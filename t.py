@@ -26,6 +26,11 @@ class DigitalOcean:
         if expect_json:
             args = list(args)
             args.extend(["--output", "json"])
+
+        if self.token:
+            args = list(args)
+            args.extend(["--access-token", self.token])
+
         args = " ".join(args)
         c = delegator.run(f"doctl {args}")
         try:
@@ -820,4 +825,3 @@ class Compute:
 
 
 compute = Compute()
-print(compute.volume.list())
