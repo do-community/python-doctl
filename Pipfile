@@ -5,8 +5,18 @@ name = "pypi"
 
 [packages]
 coreapi = "*"
+uplink = "*"
+"delegator.py" = "*"
+asciitable = "*"
+astropy = "*"
+maya = "*"
+simplejson = "*"
 
 [dev-packages]
+black = "*"
 
 [requires]
 python_version = "3.6"
+
+[pipenv]
+allow_prereleases = true
