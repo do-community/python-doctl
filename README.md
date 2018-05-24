@@ -21,7 +21,7 @@ Usage
     thoth
     macbook
 
-Available namespaces
+Available Namespaces
 --------------------
 
 The entire API surface of **doctl** is covered by this library, so the following
