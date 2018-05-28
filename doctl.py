@@ -23,9 +23,13 @@ os.environ['PATH'] = f'{BIN_CACHE}:{os.environ["PATH"]}'
 
 try:
     os.makedirs(BIN_CACHE)
-    # TODO: Add to path.
 except FileExistsError:
     pass
+
+class DOCtlError(RuntimeError):
+    def __init__(self, c):
+        self.c = c
+        self.output = c.out
 
 def ensure_doctl():
 
@@ -46,13 +50,6 @@ def ensure_doctl():
         tar = tarfile.open(tarball.name, "r|gz")
         tar.extractall(path=BIN_CACHE)
         tar.close()
-
-    print(asset)
-
-        # https://api.github.com/repos/digitalocean/doctl/releases/assets/6787120
-
-
-
 
 
 def system_which(command, mult=False):
@@ -110,7 +107,7 @@ class DigitalOcean:
             assert c.return_code == 0
         except AssertionError:
             print(c.out)
-            raise RuntimeWarning("Something went wrong!")
+            raise DOCtlError(c)
 
         if not expect_json:
             return c
