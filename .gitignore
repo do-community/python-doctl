@@ -1,2 +1,10 @@
 
 /.envrc
+
+/dist/
+
+/.gitignore
+
+/doctl.egg-info/
+
+/t.py

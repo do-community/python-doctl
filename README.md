@@ -52,9 +52,10 @@ namespaces are available for your use and enjoyment:
 - `compute.volume`
 - `compute.volume_action`
 
-✨🍰✨
 
 Installation
 ------------
 
-Coming soon!
+    $ pipenv install doctl
+
+✨🍰✨
