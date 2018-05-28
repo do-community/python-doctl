@@ -4,6 +4,7 @@ import os
 import json
 import re
 import io
+import logging
 import tarfile
 
 import delegator
@@ -19,6 +20,7 @@ html_session = requests_html.HTMLSession()
 
 BIN_CACHE = appdirs.user_cache_dir('python-doctl', 'Kenneth Reitz')
 os.environ['PATH'] = f'{BIN_CACHE}:{os.environ["PATH"]}'
+
 
 
 try:
@@ -102,7 +104,11 @@ class DigitalOcean:
             args.extend(["--access-token", self.token])
 
         args = " ".join(args)
-        c = delegator.run(f"doctl {args}")
+        cmd = f"doctl {args}"
+
+        logging.info(cmd)
+
+        c = delegator.run(cmd)
         try:
             assert c.return_code == 0
         except AssertionError:
