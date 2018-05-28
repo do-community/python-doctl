@@ -13,6 +13,7 @@ requests-html = "*"
 [dev-packages]
 black = "*"
 ipython = "*"
+sphinx = "*"
 
 [requires]
 python_version = "3.6"
