@@ -21,6 +21,11 @@ Usage
     thoth
     macbook
 
+Features
+--------
+
+- Automatically downloads `doctl`, if unavailable for your system (at runtime).
+
 Available Namespaces
 --------------------
 
