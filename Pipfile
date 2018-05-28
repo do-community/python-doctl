@@ -4,16 +4,15 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-coreapi = "*"
-uplink = "*"
 "delegator.py" = "*"
-asciitable = "*"
-astropy = "*"
 maya = "*"
-simplejson = "*"
+appdirs = "*"
+requests = "*"
+requests-html = "*"
 
 [dev-packages]
 black = "*"
+ipython = "*"
 
 [requires]
 python_version = "3.6"

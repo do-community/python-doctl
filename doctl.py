@@ -1,8 +1,76 @@
-import re
 
-import simplejson
+import sys
+import os
+import json
+import re
+import io
+import tarfile
+
 import delegator
 import maya
+import appdirs
+
+import requests
+import requests_html
+from tempfile import NamedTemporaryFile
+
+requests = requests.Session()
+html_session = requests_html.HTMLSession()
+
+BIN_CACHE = appdirs.user_cache_dir('python-doctl', 'Kenneth Reitz')
+os.environ['PATH'] = f'{BIN_CACHE}:{os.environ["PATH"]}'
+
+
+try:
+    os.makedirs(BIN_CACHE)
+    # TODO: Add to path.
+except FileExistsError:
+    pass
+
+def ensure_doctl():
+
+    r = html_session.get('https://github.com/digitalocean/doctl/releases')
+    candidates = r.html.find('#js-repo-pjax-container > div.container.new-discussion-timeline.experiment-repo-nav > div.repository-content > div.position-relative.border-top > div.release.clearfix.label-latest > div.release-body.commit.open.float-left > div.my-4 > ul', first=True).absolute_links
+
+    asset = None
+    for candidate in candidates:
+        if sys.platform in candidate and 'sha256' not in candidate:
+            asset = candidate
+
+    if asset:
+        r = requests.get(asset, stream=False)
+        tarball = NamedTemporaryFile(delete=False)
+        with open(tarball.name, 'wb') as f:
+            f.write(r.content)
+
+        tar = tarfile.open(tarball.name, "r|gz")
+        tar.extractall(path=BIN_CACHE)
+        tar.close()
+
+    print(asset)
+
+        # https://api.github.com/repos/digitalocean/doctl/releases/assets/6787120
+
+
+
+
+
+def system_which(command, mult=False):
+    """Emulates the system's which. Returns None if not found."""
+    _which = 'which -a' if not os.name == 'nt' else 'where'
+    c = delegator.run('{0} {1}'.format(_which, command))
+    try:
+        # Which Not found...
+        assert c.return_code == 0
+    except AssertionError:
+        return None if not mult else []
+
+    result = c.out.strip() or c.err.strip()
+    if mult:
+        return result.split('\n')
+
+    else:
+        return result.split('\n')[0]
 
 
 def datetime_parser(dct):
@@ -23,6 +91,11 @@ class DigitalOcean:
 
     def doctl(self, *args, expect_json=True):
         """Runs doctl."""
+
+        doctl_location = system_which('docutil')
+        if not doctl_location:
+            ensure_doctl()
+
         if expect_json:
             args = list(args)
             args.extend(["--output", "json"])
@@ -42,7 +115,7 @@ class DigitalOcean:
         if not expect_json:
             return c
         else:
-            return simplejson.loads(c.out, object_hook=datetime_parser)
+            return json.loads(c.out, object_hook=datetime_parser)
 
 
 class ComputeAccount:
