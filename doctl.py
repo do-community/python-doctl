@@ -392,11 +392,13 @@ class ComputeDomainRecords:
 
 
 class ComputeFirewall:
+    """Firewall is used to access firewall commands."""
 
     def __init__(self, do):
         self.do = do
 
     def get(self, firewall_id):
+        """Get firewall."""
         return self.do.doctl("compute", "firewall", "get", firewall_id)
 
     def create(
@@ -409,6 +411,7 @@ class ComputeFirewall:
         outbound_rules=None,
         tag_names=None,
     ):
+        """Create firewall."""
         args = []
         args.extend(["--name", name])
         if droplet_ids:
@@ -430,6 +433,7 @@ class ComputeFirewall:
         outbound_rules=None,
         tag_names=None,
     ):
+        """Update firewall."""
         args = []
         args.extend(["--name", name])
         if droplet_ids:
@@ -443,18 +447,22 @@ class ComputeFirewall:
         return self.do.doctl("compute", "firewall", "update", firewall_id, *args)
 
     def list(self):
+        """List firewalls."""
         return self.do.doctl("compute", "firewall", "list")
 
     def list_by_droplet(self, droplet_id):
+        """List firewalls by droplet ID."""
         return self.do.doctl("compute", "firewall", "list-by-droplet", droplet_id)
 
     def delete(self, firewall_id):
+        """Delete firewall."""
         c = self.do.doctl(
             "compute", "firewall", "delete", firewall_id, "--force", expect_json=False
         )
         return c.return_code == 0
 
     def add_droplets(self, firewall_id, droplet_ids):
+        """Add droplets to the firewall."""
         if not isinstance(str, droplet_ids):
             droplet_ids = ",".join(droplet_ids)
         return self.do.doctl(
@@ -467,6 +475,7 @@ class ComputeFirewall:
         )
 
     def remove_droplets(self):
+        """Remove droplets from the firewall."""
         if not isinstance(str, droplet_ids):
             droplet_ids = ",".join(droplet_ids)
         return self.do.doctl(
@@ -479,6 +488,7 @@ class ComputeFirewall:
         )
 
     def add_tags(self, firewall_id, tag_names):
+        """Add tags from the firewall."""
         if not isinstance(str, tag_names):
             tag_names = ",".join(tag_names)
 
@@ -487,6 +497,7 @@ class ComputeFirewall:
         )
 
     def remove_tags(self, firewall_id, tag_names):
+        """Remove tags from the firewall."""
         if not isinstance(str, tag_names):
             tag_names = ",".join(tag_names)
 
@@ -500,6 +511,7 @@ class ComputeFirewall:
         )
 
     def add_rules(self, firewall_id, inbound_rules=None, outbound_rules=None):
+        """Add inbound/outbound rules to the firewall."""
         args = []
         if inbound_rules:
             args.extend(["--inbound-rules", inbound_rules])
@@ -509,6 +521,7 @@ class ComputeFirewall:
         return self.do.doctl("compute", "firewall", "add-rules", firewall_id, *args)
 
     def remove_rules(firewall_id, inbound_rules=None, outbound_rules=None):
+        """Remove inbound/outbound rules to the firewall."""
         args = []
         if inbound_rules:
             args.extend(["--inbound-rules", inbound_rules])
@@ -519,33 +532,45 @@ class ComputeFirewall:
 
 
 class ComputeFloatingIP:
+    """Floating-ip is used to access commands on floating IPs."""
 
     def __init__(self, do):
         self.do = do
 
     def create(self, droplet_id):
+        """Create a floating IP."""
         return self.do.doctl("compute", "floating-ip", "create", droplet_id)
 
     def get(self, droplet_id):
+        """Get the details of a floating IP."""
         return self.do.doctl("compute", "floating-ip", "get", droplet_id)
 
     def delete(self, droplet_id):
+        """Delete a floating IP address."""
         c = self.do.doctl(
             "compute", "floating-ip", "delete", droplet_id, expect_json=False
         )
         return c.return_code == 0
 
     def list(self):
+        """List all floating IP addresses."""
         return self.do.doctl("compute", "floating-ip", "list")
 
+
+class ComputeFloatingIPAction:
+    """Floating IP action commands."""
+    def __init__(self, do):
+        self.do = do
+
     def get(self, floating_ip, action_id):
-        return self.do.doctl("compute", "floating-ip", "get", floating_ip, action_id)
+        """Get the details"""
+        return self.do.doctl("compute", "floating-ip-action", "get", floating_ip, action_id)
 
     def assign(self, floating_ip, droplet_id):
-        return self.do.doctl("compute", "floating-ip", floating_ip, droplet_id)
+        return self.do.doctl("compute", "floating-ip-action", floating_ip, droplet_id)
 
     def unassign(self, floating_ip):
-        return self.do.doctl("compute", "floating-ip", "unassign", floating_ip)
+        return self.do.doctl("compute", "floating-ip-action", "unassign", floating_ip)
 
 
 class ComputeImage:
@@ -921,6 +946,7 @@ class Compute:
     :ivar domain_records: interacting with an individual domain (:class:`ComputeDomainRecords`).
     :ivar firewall: access firewall commands (:class:`ComputeFirewallAccess`).
     :ivar floating_ip: access commands on floating IPs (:class:`ComputeFloatingIP`).
+    :ivar floating_ip_action: floating IP action commands (:class:`ComputeFloatingIPAction`).
     :ivar image: image commands (:class:`ComputeImage`).
     :ivar image_action: image-action commands (:class:`ComputeImageAction`).
     :ivar load_balancer: access load-balancer commands (:class:`ComputeLoadBalancer`).
@@ -941,6 +967,7 @@ class Compute:
         self.domain_records = ComputeDomainRecords(do=self.do)
         self.firewall = ComputeFirewall(do=self.do)
         self.floating_ip = ComputeFloatingIP(do=self.do)
+        self.floating_ip_action = ComputeFloatingIPAction(do=self.do)
         self.image = ComputeImage(do=self.do)
         self.image_action = ComputeImageAction(do=self.do)
         self.load_balancer = ComputeLoadBalancer(do=self.do)
