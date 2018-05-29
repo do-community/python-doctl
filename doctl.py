@@ -83,13 +83,14 @@ def datetime_parser(dct):
 
 
 class DigitalOcean:
+    """The DigitalOcean Client. Used to make all calls to doctcl."""
 
     def __init__(self, token=None):
         self.token = token
         self.compute = Compute(do=self)
 
     def doctl(self, *args, expect_json=True):
-        """Runs doctl."""
+        """Runs doctl, with provided arguments."""
 
         doctl_location = system_which('docutil')
         if not doctl_location:
@@ -119,18 +120,6 @@ class DigitalOcean:
             return c
         else:
             return json.loads(c.out, object_hook=datetime_parser)
-
-
-class ComputeAccount:
-
-    def __init__(self, do):
-        self.do = do
-
-    def get(self):
-        return self.do.doctl("account", "get")
-
-    def rate_limit(self):
-        return self.do.doctl("account", "ratelimit")
 
 
 class ComputeAction:
@@ -837,16 +826,19 @@ class ComputeVolume:
 
 
 class ComputeVolumeAction:
+    """volume-action is used to access volume action commands"""
 
     def __init__(self, do):
         self.do = do
 
     def attach(self, volume_id, droplet_id):
+        """Attaches a volume."""
         return self.do.doctl(
             "compute", "volume-action", "attach", volume_id, droplet_id
         )
 
     def detach(self, volume_id, droplet_id):
+        """Detatches a volume."""
         return self.do.doctl(
             "compute",
             "volume-action",
@@ -859,6 +851,7 @@ class ComputeVolumeAction:
         )
 
     def resize(self, volume_id, region, size):
+        """Resizes a volume."""
         return self.do.doctl(
             "compute",
             "volume-action",
@@ -870,14 +863,33 @@ class ComputeVolumeAction:
             size,
         )
 
+# self.account = ComputeAccount(do=self.do)
 
 class Compute:
+    """compute commands are for controlling and managing infrastructure
+
+    :ivar certificate: access certificate commands.
+    :ivar action: access action commands.
+    :ivar droplet: access droplet commands.
+    :ivar domain: access domain commands.
+    :ivar domain_records: interacting with an individual domain.
+    :ivar firewall: access firewall commands.
+    :ivar floating_ip: access commands on floating IPs.
+    :ivar image: image commands.
+    :ivar image_action: image-action commands.
+    :ivar load_balancer: access load-balancer commands.
+    :ivar plugin: access plugin commands.
+    :ivar snapshot: access snapshot commands.
+    :ivar ssh_key: access ssh key commands.
+    :ivar tag: access tag commands.
+    :ivar volume: access volume commands.
+    :ivar volume_action: access volume action commands.
+    """
 
     def __init__(self, do=None):
         self.do = do or DigitalOcean()
         self.certificate = ComputeCertificate(do=self.do)
         self.action = ComputeAction(do=self.do)
-        self.account = ComputeAccount(do=self.do)
         self.droplet = ComputeDroplet(do=self.do)
         self.domain = ComputeDomain(do=self.do)
         self.domain_records = ComputeDomainRecords(do=self.do)
@@ -899,5 +911,19 @@ class Compute:
     def size_list(self):
         return self.do.doctl("compute", "size", "list")
 
+class Account:
+    """account is used to access account commands."""
+
+    def __init__(self, do=None):
+        self.do = do or DigitalOcean()
+
+    def get(self):
+        """get account."""
+        return self.do.doctl("account", "get")
+
+    def rate_limit(self):
+        """get API rate limits."""
+        return self.do.doctl("account", "ratelimit")
 
 compute = Compute()
+account = Account()
