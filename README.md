@@ -26,6 +26,12 @@ Features
 
 - Automatically downloads `doctl`, if unavailable for your system (at runtime).
 
+Notes
+-----
+
+Use of the `DIGITALOCEAN_ACCESS_TOKEN` environment variable is recommended.
+
+
 Available Namespaces
 --------------------
 
