@@ -37,6 +37,17 @@ Example Usage
     thoth
     macbook
 
+Features
+--------
+
+- Automatically downloads ``doctl``, if unavailable for your system (at runtime).
+- All methods return Python data structures, includinging timezone–aware Datetime objects.
+
+Notes
+-----
+
+Use of the ``DIGITALOCEAN_ACCESS_TOKEN`` environment variable is recommended.
+
 
 API Documentation
 =================

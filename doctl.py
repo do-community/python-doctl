@@ -139,35 +139,44 @@ class DigitalOcean:
 
 
 class ComputeAction:
+    """action is used to access action commands."""
 
     def __init__(self, do):
         self.do = do
 
     def get(self, action_id):
+        """get action."""
         return self.do.doctl("compute", "action", "get", action_id)
 
     def wait(self, action_id):
+        """wait for action to complete."""
         return self.do.doctl("compute", "action", "wait", action_id)
 
     def list(self):
+        """list actions."""
         return self.do.doctl("compute", "action", "list")
 
 
 class ComputeCertificate:
+    """certificate is used to access certificate commands."""
 
     def __init__(self, do):
         self.do = do
 
     def get(self, certificate_id):
+        """get certificate."""
         return self.do.doctl("compute", "certificate", "get", certificate_id)
 
     def create(self):
+        """create new certificate."""
         raise NotImplementedError()
 
     def list(self):
+        """list certificates."""
         return self.do.doctl("compute", "certificate", "list")
 
     def delete(self, certificate_id):
+        """delete certificates"""
         c = self.do.doctl(
             "compute",
             "certificate",
@@ -180,17 +189,21 @@ class ComputeCertificate:
 
 
 class ComputeDroplet:
+    """droplet is used to access droplet commands."""
 
     def __init__(self, do):
         self.do = do
 
     def list(self):
+        """list droplets."""
         return self.do.doctl("compute", "droplet", "list")
 
     def get(self, droplet_id):
+        """get droplet."""
         return self.do.doctl("compute", "droplet", "get", droplet_id)
 
     def delete(self, droplet_id):
+        """Delete droplet by id or name."""
         c = self.do.doctl(
             "compute", "droplet", "delete", droplet_id, "--force", expect_json=False
         )
@@ -212,6 +225,7 @@ class ComputeDroplet:
         enble_backups=False,
         wait=False,
     ):
+        """create droplet."""
         args = []
         args.extend([name])
         args.extend(["--image", image])
@@ -235,24 +249,31 @@ class ComputeDroplet:
         return doctl("compute", "droplet", "create", *args)
 
     def actions(self, droplet_id):
+        """droplet actions."""
         return self.do.doctl("compute", "droplet", "actions", droplet_id)
 
     def backups(self, droplet_id):
+        """droplet backups."""
         return self.do.doctl("compute", "droplet", "backups", droplet_id)
 
     def kernels(self, droplet_id):
+        """droplet kernels."""
         return self.do.doctl("compute", "droplet", "kernels", droplet_id)
 
     def neighbors(self, droplet_id):
+        """droplet neighbors."""
         return self.do.doctl("compute", "droplet", "neighbors", droplet_id)
 
     def snapshots(self, droplet_id):
+        """snapshots."""
         return self.do.doctl("compute", "droplet", "snapshots", droplet_id)
 
     def tag(self, droplet_id, tag_name):
+        """tag."""
         raise NotImplementedError
 
     def untag(self, droplet_id, tag_name):
+        """untag."""
         raise NotImplementedError
 
 
@@ -884,22 +905,22 @@ class ComputeVolumeAction:
 class Compute:
     """compute commands are for controlling and managing infrastructure
 
-    :ivar certificate: access certificate commands.
-    :ivar action: access action commands.
-    :ivar droplet: access droplet commands.
-    :ivar domain: access domain commands.
-    :ivar domain_records: interacting with an individual domain.
-    :ivar firewall: access firewall commands.
-    :ivar floating_ip: access commands on floating IPs.
-    :ivar image: image commands.
-    :ivar image_action: image-action commands.
-    :ivar load_balancer: access load-balancer commands.
-    :ivar plugin: access plugin commands.
-    :ivar snapshot: access snapshot commands.
-    :ivar ssh_key: access ssh key commands.
-    :ivar tag: access tag commands.
-    :ivar volume: access volume commands.
-    :ivar volume_action: access volume action commands.
+    :ivar certificate: access certificate commands (:class:`ComputeCertificate`).
+    :ivar action: access action commands (:class:`ComputeAction`).
+    :ivar droplet: access droplet commands (:class:`ComputeDroplet`).
+    :ivar domain: access domain commands (:class:`ComputeDomain`).
+    :ivar domain_records: interacting with an individual domain (:class:`ComputeDomainRecords`).
+    :ivar firewall: access firewall commands (:class:`ComputeFirewallAccess`).
+    :ivar floating_ip: access commands on floating IPs (:class:`ComputeFloatingIP`).
+    :ivar image: image commands (:class:`ComputeImage`).
+    :ivar image_action: image-action commands (:class:`ComputeImageAction`).
+    :ivar load_balancer: access load-balancer commands (:class:`ComputeLoadBalancer`).
+    :ivar plugin: access plugin commands (:class:`ComputePlugin`).
+    :ivar snapshot: access snapshot commands (:class:`ComputeSnapshot`).
+    :ivar ssh_key: access ssh key commands (:class:`ComputeSSHKey`).
+    :ivar tag: access tag commands (:class:`ComputeTag`).
+    :ivar volume: access volume commands (:class:`ComputeVolume`).
+    :ivar volume_action: access volume action commands (:class:`ComputeVolumeAction`).
     """
 
     def __init__(self, do=None):
