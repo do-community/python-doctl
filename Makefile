@@ -1,4 +1,4 @@
 documentation:
-	sphinx-build docs docs/build
-	mv docs/build/* docs/
-	mv docs/build/.* docs/
+	cd docs && make html
+	rm -fr docs/_modules docs/_sources docs/_static
+	mv docs/_build/html/* docs/
