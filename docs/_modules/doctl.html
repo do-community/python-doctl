@@ -310,34 +310,40 @@
 
 
 <div class="viewcode-block" id="ComputeDomain"><a class="viewcode-back" href="../index.html#doctl.ComputeDomain">[docs]</a><span class="k">class</span> <span class="nc">ComputeDomain</span><span class="p">:</span>
-
+    <span class="sd">&quot;&quot;&quot;domain is used to access domain commands.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">do</span> <span class="o">=</span> <span class="n">do</span>
 
-    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">ip_address</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeDomain.create"><a class="viewcode-back" href="../index.html#doctl.ComputeDomain.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">ip_address</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create domain.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span> <span class="n">create</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="s2">&quot;--ip-address&quot;</span><span class="p">,</span> <span class="n">ip_address</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeDomain.list"><a class="viewcode-back" href="../index.html#doctl.ComputeDomain.list">[docs]</a>    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List domain.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeDomain.get"><a class="viewcode-back" href="../index.html#doctl.ComputeDomain.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get domain.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="s2">&quot;--force&quot;</span><span class="p">)</span></div>
+<div class="viewcode-block" id="ComputeDomain.delete"><a class="viewcode-back" href="../index.html#doctl.ComputeDomain.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete domain.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="s2">&quot;--force&quot;</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ComputeDomainRecords"><a class="viewcode-back" href="../index.html#doctl.ComputeDomainRecords">[docs]</a><span class="k">class</span> <span class="nc">ComputeDomainRecords</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Commands for interacting with an individual domain.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">do</span> <span class="o">=</span> <span class="n">do</span>
 
-    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeDomainRecords.list"><a class="viewcode-back" href="../index.html#doctl.ComputeDomainRecords.list">[docs]</a>    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List records.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span>
+<div class="viewcode-block" id="ComputeDomainRecords.create"><a class="viewcode-back" href="../index.html#doctl.ComputeDomainRecords.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">domain</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
@@ -351,6 +357,7 @@
         <span class="n">record_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">record_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List records.&quot;&quot;&quot;</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">record_data</span><span class="p">:</span>
             <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--record-data&quot;</span><span class="p">,</span> <span class="n">record_data</span><span class="p">])</span>
@@ -371,14 +378,15 @@
         <span class="k">if</span> <span class="n">record_weight</span><span class="p">:</span>
             <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--record-weight&quot;</span><span class="p">,</span> <span class="n">record_weight</span><span class="p">])</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">record_id</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeDomainRecords.delete"><a class="viewcode-back" href="../index.html#doctl.ComputeDomainRecords.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">record_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete records.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">record_id</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
+<div class="viewcode-block" id="ComputeDomainRecords.update"><a class="viewcode-back" href="../index.html#doctl.ComputeDomainRecords.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">domain</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
@@ -392,6 +400,7 @@
         <span class="n">record_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">record_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update records.&quot;&quot;&quot;</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">record_data</span><span class="p">:</span>
             <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--record-data&quot;</span><span class="p">,</span> <span class="n">record_data</span><span class="p">])</span>
@@ -411,7 +420,7 @@
             <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--record-type&quot;</span><span class="p">,</span> <span class="n">record_type</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">record_weight</span><span class="p">:</span>
             <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--record-weight&quot;</span><span class="p">,</span> <span class="n">record_weight</span><span class="p">])</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ComputeFirewall"><a class="viewcode-back" href="../index.html#doctl.ComputeFirewall">[docs]</a><span class="k">class</span> <span class="nc">ComputeFirewall</span><span class="p">:</span>

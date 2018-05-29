@@ -282,12 +282,62 @@ Otherwise, JSON output will be parsed and the results will be returned.</p>
 <dl class="class">
 <dt id="doctl.ComputeDomain">
 <em class="property">class </em><code class="descclassname">doctl.</code><code class="descname">ComputeDomain</code><span class="sig-paren">(</span><em>do</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/doctl.html#ComputeDomain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#doctl.ComputeDomain" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>domain is used to access domain commands.</p>
+<dl class="method">
+<dt id="doctl.ComputeDomain.create">
+<code class="descname">create</code><span class="sig-paren">(</span><em>domain</em>, <em>ip_address</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/doctl.html#ComputeDomain.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#doctl.ComputeDomain.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create domain.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="doctl.ComputeDomain.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><em>domain</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/doctl.html#ComputeDomain.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#doctl.ComputeDomain.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete domain.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="doctl.ComputeDomain.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>domain</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/doctl.html#ComputeDomain.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#doctl.ComputeDomain.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get domain.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="doctl.ComputeDomain.list">
+<code class="descname">list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/doctl.html#ComputeDomain.list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#doctl.ComputeDomain.list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List domain.</p>
+</dd></dl>
+
+</dd></dl>
 
 <dl class="class">
 <dt id="doctl.ComputeDomainRecords">
 <em class="property">class </em><code class="descclassname">doctl.</code><code class="descname">ComputeDomainRecords</code><span class="sig-paren">(</span><em>do</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/doctl.html#ComputeDomainRecords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#doctl.ComputeDomainRecords" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Commands for interacting with an individual domain.</p>
+<dl class="method">
+<dt id="doctl.ComputeDomainRecords.create">
+<code class="descname">create</code><span class="sig-paren">(</span><em>domain</em>, <em>*</em>, <em>record_data=None</em>, <em>record_flags=None</em>, <em>record_name=None</em>, <em>record_port=None</em>, <em>record_priority=None</em>, <em>record_tag=None</em>, <em>record_ttl=None</em>, <em>record_type=None</em>, <em>record_weight=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/doctl.html#ComputeDomainRecords.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#doctl.ComputeDomainRecords.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>List records.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="doctl.ComputeDomainRecords.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><em>domain</em>, <em>record_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/doctl.html#ComputeDomainRecords.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#doctl.ComputeDomainRecords.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete records.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="doctl.ComputeDomainRecords.list">
+<code class="descname">list</code><span class="sig-paren">(</span><em>domain</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/doctl.html#ComputeDomainRecords.list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#doctl.ComputeDomainRecords.list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List records.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="doctl.ComputeDomainRecords.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>domain</em>, <em>*</em>, <em>record_data=None</em>, <em>record_flags=None</em>, <em>record_name=None</em>, <em>record_port=None</em>, <em>record_priority=None</em>, <em>record_tag=None</em>, <em>record_ttl=None</em>, <em>record_type=None</em>, <em>record_weight=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/doctl.html#ComputeDomainRecords.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#doctl.ComputeDomainRecords.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update records.</p>
+</dd></dl>
+
+</dd></dl>
 
 <dl class="class">
 <dt id="doctl.ComputeFirewall">

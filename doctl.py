@@ -278,31 +278,37 @@ class ComputeDroplet:
 
 
 class ComputeDomain:
-
+    """domain is used to access domain commands."""
     def __init__(self, do):
         self.do = do
 
     def create(self, domain, ip_address):
+        """Create domain."""
         return self.do.doctl(
             "compute", "domain", create, domain, "--ip-address", ip_address
         )
 
     def list(self):
+        """List domain."""
         return self.do.doctl("compute", "domain", "list")
 
     def get(self, domain):
+        """Get domain."""
         return self.do.doctl("compute", "domain", "get", domain)
 
     def delete(self, domain):
+        """Delete domain."""
         return self.do.doctl("compute", "domain", "delete", domain, "--force")
 
 
 class ComputeDomainRecords:
+    """Commands for interacting with an individual domain."""
 
     def __init__(self, do):
         self.do = do
 
     def list(self, domain):
+        """List records."""
         return self.do.doctl("compute", "domain", "records", "list", domain)
 
     def create(
@@ -319,6 +325,7 @@ class ComputeDomainRecords:
         record_type=None,
         record_weight=None,
     ):
+        """List records."""
         args = []
         if record_data:
             args.extend(["--record-data", record_data])
@@ -342,6 +349,7 @@ class ComputeDomainRecords:
         return self.do.doctl("compute", "domain", "records", "create", domain, *args)
 
     def delete(self, domain, record_id):
+        """Delete records."""
         return self.do.doctl(
             "compute", "domain", "records", "delete", domain, record_id
         )
@@ -360,6 +368,7 @@ class ComputeDomainRecords:
         record_type=None,
         record_weight=None,
     ):
+        """Update records."""
         args = []
         if record_data:
             args.extend(["--record-data", record_data])
