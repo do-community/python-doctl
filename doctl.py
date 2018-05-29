@@ -34,7 +34,10 @@ class DOCtlError(RuntimeError):
         self.output = c.out
 
 def ensure_doctl():
-
+    """Attempts to download docutil from GitHub, and store it in the
+    user's cache directory.
+    """
+    logging.info('Fetching latest docutil release…')
     r = html_session.get('https://github.com/digitalocean/doctl/releases')
     candidates = r.html.find('#js-repo-pjax-container > div.container.new-discussion-timeline.experiment-repo-nav > div.repository-content > div.position-relative.border-top > div.release.clearfix.label-latest > div.release-body.commit.open.float-left > div.my-4 > ul', first=True).absolute_links
 
@@ -44,12 +47,14 @@ def ensure_doctl():
             asset = candidate
 
     if asset:
+        logging.info('Installation candidate found!')
         r = requests.get(asset, stream=False)
         tarball = NamedTemporaryFile(delete=False)
         with open(tarball.name, 'wb') as f:
             f.write(r.content)
 
         tar = tarfile.open(tarball.name, "r|gz")
+        logging.info('Extracting docutil installation…')
         tar.extractall(path=BIN_CACHE)
         tar.close()
 
@@ -83,14 +88,25 @@ def datetime_parser(dct):
 
 
 class DigitalOcean:
-    """The DigitalOcean Client. Used to make all calls to doctcl."""
+    """The DigitalOcean Client. Used to make all calls to doctcl.
+
+    ``token`` is optional — if none is given, the system-configured
+    authentication will be used, or the ``DIGITALOCEAN_ACCESS_TOKEN``
+    environment variable will be honored.
+    """
 
     def __init__(self, token=None):
         self.token = token
         self.compute = Compute(do=self)
 
     def doctl(self, *args, expect_json=True):
-        """Runs doctl, with provided arguments."""
+        """Runs doctl, with provided arguments.
+
+        if ``expect_json`` is False, the ``delegator`` subprocess is returned.
+        Otherwise, JSON output will be parsed and the results will be returned.
+
+        Return–code is always asserted to be ``0``.
+        """
 
         doctl_location = system_which('docutil')
         if not doctl_location:

@@ -41,8 +41,8 @@ Example Usage
 API Documentation
 =================
 
-Main Interface
---------------
+Main Interfaces
+---------------
 
 .. module:: doctl
 
@@ -57,6 +57,63 @@ This is also an `Account` class, for viewing your authentication information, as
 .. autoclass:: Account
     :members:
 
+Low–Level Classes
+-----------------
+
+.. autoclass:: DigitalOcean
+    :members:
+
+
+Compute Classes
+---------------
+
+.. autoclass:: ComputeAction
+    :members:
+
+.. autoclass:: ComputeCertificate
+    :members:
+
+.. autoclass:: ComputeDroplet
+    :members:
+
+.. autoclass:: ComputeDomain
+    :members:
+
+.. autoclass:: ComputeDomainRecords
+    :members:
+
+.. autoclass:: ComputeFirewall
+    :members:
+
+.. autoclass:: ComputeFloatingIP
+    :members:
+
+.. autoclass:: ComputeImage
+    :members:
+
+.. autoclass:: ComputeImageAction
+    :members:
+
+.. autoclass:: ComputeLoadBalancer
+    :members:
+
+.. autoclass:: ComputePlugin
+    :members:
+
+.. autoclass:: ComputeSnapshot
+    :members:
+
+.. autoclass:: ComputeSSHKey
+    :members:
+
+.. autoclass:: ComputeTag
+    :members:
+
+.. autoclass:: ComputeVolume
+    :members:
+
+.. autoclass:: ComputeVolumeAction
+    :members:
 
 Indices and tables
 ==================
