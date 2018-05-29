@@ -4,17 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-"delegator.py" = "*"
-maya = "*"
-appdirs = "*"
-requests = "*"
-requests-html = "*"
 
 [dev-packages]
 black = "*"
 ipython = "*"
 sphinx = "*"
 twine = "*"
+doctl = {path="."}
 
 [requires]
 python_version = "3.6"
