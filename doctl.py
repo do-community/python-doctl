@@ -18,9 +18,8 @@ from tempfile import NamedTemporaryFile
 requests = requests.Session()
 html_session = requests_html.HTMLSession()
 
-BIN_CACHE = appdirs.user_cache_dir('python-doctl', 'Kenneth Reitz')
-os.environ['PATH'] = f'{BIN_CACHE}:{os.environ["PATH"]}'
-
+BIN_CACHE = appdirs.user_cache_dir("python-doctl", "Kenneth Reitz")
+os.environ["PATH"] = f'{BIN_CACHE}:{os.environ["PATH"]}'
 
 
 try:
@@ -28,41 +27,46 @@ try:
 except FileExistsError:
     pass
 
+
 class DOCtlError(RuntimeError):
     def __init__(self, c):
         self.c = c
         self.output = c.out
 
+
 def ensure_doctl():
     """Attempts to download docutil from GitHub, and store it in the
     user's cache directory.
     """
-    logging.info('Fetching latest docutil release…')
-    r = html_session.get('https://github.com/digitalocean/doctl/releases')
-    candidates = r.html.find('#js-repo-pjax-container > div.container.new-discussion-timeline.experiment-repo-nav > div.repository-content > div.position-relative.border-top > div.release.clearfix.label-latest > div.release-body.commit.open.float-left > div.my-4 > ul', first=True).absolute_links
+    logging.info("Fetching latest docutil release…")
+    r = html_session.get("https://github.com/digitalocean/doctl/releases")
+    candidates = r.html.find(
+        "#js-repo-pjax-container > div.container.new-discussion-timeline.experiment-repo-nav > div.repository-content > div.position-relative.border-top > div.release.clearfix.label-latest > div.release-body.commit.open.float-left > div.my-4 > ul",
+        first=True,
+    ).absolute_links
 
     asset = None
     for candidate in candidates:
-        if sys.platform in candidate and 'sha256' not in candidate:
+        if sys.platform in candidate and "sha256" not in candidate:
             asset = candidate
 
     if asset:
-        logging.info('Installation candidate found!')
+        logging.info("Installation candidate found!")
         r = requests.get(asset, stream=False)
         tarball = NamedTemporaryFile(delete=False)
-        with open(tarball.name, 'wb') as f:
+        with open(tarball.name, "wb") as f:
             f.write(r.content)
 
         tar = tarfile.open(tarball.name, "r|gz")
-        logging.info('Extracting docutil installation…')
+        logging.info("Extracting docutil installation…")
         tar.extractall(path=BIN_CACHE)
         tar.close()
 
 
 def system_which(command, mult=False):
     """Emulates the system's which. Returns None if not found."""
-    _which = 'which -a' if not os.name == 'nt' else 'where'
-    c = delegator.run('{0} {1}'.format(_which, command))
+    _which = "which -a" if not os.name == "nt" else "where"
+    c = delegator.run("{0} {1}".format(_which, command))
     try:
         # Which Not found...
         assert c.return_code == 0
@@ -71,10 +75,10 @@ def system_which(command, mult=False):
 
     result = c.out.strip() or c.err.strip()
     if mult:
-        return result.split('\n')
+        return result.split("\n")
 
     else:
-        return result.split('\n')[0]
+        return result.split("\n")[0]
 
 
 def datetime_parser(dct):
@@ -108,7 +112,7 @@ class DigitalOcean:
         Return–code is always asserted to be ``0``.
         """
 
-        doctl_location = system_which('docutil')
+        doctl_location = system_which("docutil")
         if not doctl_location:
             ensure_doctl()
 
@@ -279,6 +283,7 @@ class ComputeDroplet:
 
 class ComputeDomain:
     """domain is used to access domain commands."""
+
     def __init__(self, do):
         self.do = do
 
@@ -559,12 +564,15 @@ class ComputeFloatingIP:
 
 class ComputeFloatingIPAction:
     """Floating IP action commands."""
+
     def __init__(self, do):
         self.do = do
 
     def get(self, floating_ip, action_id):
         """Get the details"""
-        return self.do.doctl("compute", "floating-ip-action", "get", floating_ip, action_id)
+        return self.do.doctl(
+            "compute", "floating-ip-action", "get", floating_ip, action_id
+        )
 
     def assign(self, floating_ip, droplet_id):
         return self.do.doctl("compute", "floating-ip-action", floating_ip, droplet_id)
@@ -574,7 +582,6 @@ class ComputeFloatingIPAction:
 
 
 class ComputeImage:
-
     def __init__(self, do):
         self.do = do
 
@@ -606,7 +613,6 @@ class ComputeImage:
 
 
 class ComputeImageAction:
-
     def __init__(self, do):
         self.do = do
 
@@ -624,7 +630,6 @@ class ComputeImageAction:
 
 
 class ComputeLoadBalancer:
-
     def __init__(self, do):
         self.do = do
 
@@ -782,7 +787,6 @@ class ComputeLoadBalancer:
 
 
 class ComputePlugin:
-
     def __init__(self, do):
         self.do = do
 
@@ -794,7 +798,6 @@ class ComputePlugin:
 
 
 class ComputeSnapshot:
-
     def __init__(self, do):
         self.do = do
 
@@ -810,7 +813,6 @@ class ComputeSnapshot:
 
 
 class ComputeSSHKey:
-
     def __init__(self, do):
         self.do = do
 
@@ -843,7 +845,6 @@ class ComputeSSHKey:
 
 
 class ComputeTag:
-
     def __init__(self, do):
         self.do = do
 
@@ -864,7 +865,6 @@ class ComputeTag:
 
 
 class ComputeVolume:
-
     def __init__(self, do):
         self.do = do
 
@@ -934,7 +934,9 @@ class ComputeVolumeAction:
             size,
         )
 
+
 # self.account = ComputeAccount(do=self.do)
+
 
 class Compute:
     """compute commands are for controlling and managing infrastructure
@@ -984,6 +986,7 @@ class Compute:
     def size_list(self):
         return self.do.doctl("compute", "size", "list")
 
+
 class Account:
     """account is used to access account commands."""
 
@@ -997,6 +1000,7 @@ class Account:
     def rate_limit(self):
         """get API rate limits."""
         return self.do.doctl("account", "ratelimit")
+
 
 compute = Compute()
 account = Account()
