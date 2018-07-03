@@ -16,3 +16,6 @@
 /docs/_build/doctrees/environment.pickle
 
 /docs/_build/
+
+/.vscode
+/.pytest_cache
