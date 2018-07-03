@@ -1,4 +1,3 @@
-
 import sys
 import os
 import json
@@ -94,7 +93,7 @@ def datetime_parser(dct):
 class DigitalOcean:
     """The DigitalOcean Client. Used to make all calls to doctcl.
 
-    ``token`` is optional — if none is given, the system-configured
+    ``token`` is optional — if none is given, the system-configured
     authentication will be used, or the ``DIGITALOCEAN_ACCESS_TOKEN``
     environment variable will be honored.
     """
