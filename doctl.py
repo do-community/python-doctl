@@ -1,18 +1,18 @@
-import sys
-import os
-import json
-import re
 import io
+import json
 import logging
+import os
+import re
+import sys
 import tarfile
+from tempfile import NamedTemporaryFile
+
+import appdirs
+import requests
 
 import delegator
 import maya
-import appdirs
-
-import requests
 import requests_html
-from tempfile import NamedTemporaryFile
 
 requests = requests.Session()
 html_session = requests_html.HTMLSession()
