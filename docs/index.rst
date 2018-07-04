@@ -6,6 +6,14 @@
 python-doctl
 ============
 
+A Python wrapper for the excellent `doctl`_ command-line utility, from
+`Digital Ocean`_.
+
+.. _doctl: https://github.com/slantview/doctl
+.. _Digital Ocean: https://digitalocean.com
+
+-----------------------
+
 This documentation exists to guide you through the usage of the `doctl <https://pypi.org/project/doctl/>`_ Python library — a Pythonic wrapper around the ``doctl`` command–line utility, for managing your `DigitalOcean <https://digitalocean.com/>`_ infrastructure.
 
 Please enjoy!
