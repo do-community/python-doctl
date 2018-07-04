@@ -3,8 +3,6 @@
 
 /dist/
 
-/.gitignore
-
 /doctl.egg-info/
 
 /t.py
@@ -19,3 +17,4 @@
 
 /.vscode
 /.pytest_cache
+.DS_Store
