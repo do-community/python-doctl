@@ -27,32 +27,32 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for doctl</h1><div class="highlight"><pre>
-<span></span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">tarfile</span>
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="k">import</span> <span class="n">NamedTemporaryFile</span>
+
+<span class="kn">import</span> <span class="nn">appdirs</span>
+<span class="kn">import</span> <span class="nn">requests</span>
 
 <span class="kn">import</span> <span class="nn">delegator</span>
 <span class="kn">import</span> <span class="nn">maya</span>
-<span class="kn">import</span> <span class="nn">appdirs</span>
-
-<span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">import</span> <span class="nn">requests_html</span>
-<span class="kn">from</span> <span class="nn">tempfile</span> <span class="k">import</span> <span class="n">NamedTemporaryFile</span>
 
 <span class="n">requests</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
 <span class="n">html_session</span> <span class="o">=</span> <span class="n">requests_html</span><span class="o">.</span><span class="n">HTMLSession</span><span class="p">()</span>
 
-<span class="n">BIN_CACHE</span> <span class="o">=</span> <span class="n">appdirs</span><span class="o">.</span><span class="n">user_cache_dir</span><span class="p">(</span><span class="s1">&#39;python-doctl&#39;</span><span class="p">,</span> <span class="s1">&#39;Kenneth Reitz&#39;</span><span class="p">)</span>
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;PATH&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{BIN_CACHE}</span><span class="s1">:</span><span class="si">{os.environ[&quot;PATH&quot;]}</span><span class="s1">&#39;</span>
-
+<span class="n">BIN_CACHE</span> <span class="o">=</span> <span class="n">appdirs</span><span class="o">.</span><span class="n">user_cache_dir</span><span class="p">(</span><span class="s2">&quot;python-doctl&quot;</span><span class="p">,</span> <span class="s2">&quot;Kenneth Reitz&quot;</span><span class="p">)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{BIN_CACHE}</span><span class="s1">:</span><span class="si">{os.environ[&quot;PATH&quot;]}</span><span class="s1">&#39;</span>
 
 
 <span class="k">try</span><span class="p">:</span>
@@ -60,41 +60,46 @@
 <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
     <span class="k">pass</span>
 
+
 <span class="k">class</span> <span class="nc">DOCtlError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="n">c</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">out</span>
 
+
 <span class="k">def</span> <span class="nf">ensure_doctl</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Attempts to download docutil from GitHub, and store it in the</span>
 <span class="sd">    user&#39;s cache directory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Fetching latest docutil release…&#39;</span><span class="p">)</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">html_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;https://github.com/digitalocean/doctl/releases&#39;</span><span class="p">)</span>
-    <span class="n">candidates</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;#js-repo-pjax-container &gt; div.container.new-discussion-timeline.experiment-repo-nav &gt; div.repository-content &gt; div.position-relative.border-top &gt; div.release.clearfix.label-latest &gt; div.release-body.commit.open.float-left &gt; div.my-4 &gt; ul&#39;</span><span class="p">,</span> <span class="n">first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">absolute_links</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Fetching latest docutil release…&quot;</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">html_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://github.com/digitalocean/doctl/releases&quot;</span><span class="p">)</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+        <span class="s2">&quot;#js-repo-pjax-container &gt; div.container.new-discussion-timeline.experiment-repo-nav &gt; div.repository-content &gt; div.position-relative.border-top &gt; div.release.clearfix.label-latest &gt; div.release-body.commit.open.float-left &gt; div.my-4 &gt; ul&quot;</span><span class="p">,</span>
+        <span class="n">first</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">absolute_links</span>
 
     <span class="n">asset</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="ow">in</span> <span class="n">candidate</span> <span class="ow">and</span> <span class="s1">&#39;sha256&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">candidate</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="ow">in</span> <span class="n">candidate</span> <span class="ow">and</span> <span class="s2">&quot;sha256&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">candidate</span><span class="p">:</span>
             <span class="n">asset</span> <span class="o">=</span> <span class="n">candidate</span>
 
     <span class="k">if</span> <span class="n">asset</span><span class="p">:</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Installation candidate found!&#39;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Installation candidate found!&quot;</span><span class="p">)</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">asset</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">tarball</span> <span class="o">=</span> <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tarball</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tarball</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
 
         <span class="n">tar</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">tarball</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;r|gz&quot;</span><span class="p">)</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Extracting docutil installation…&#39;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Extracting docutil installation…&quot;</span><span class="p">)</span>
         <span class="n">tar</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">BIN_CACHE</span><span class="p">)</span>
         <span class="n">tar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 
 <span class="k">def</span> <span class="nf">system_which</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">mult</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Emulates the system&#39;s which. Returns None if not found.&quot;&quot;&quot;</span>
-    <span class="n">_which</span> <span class="o">=</span> <span class="s1">&#39;which -a&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;nt&#39;</span> <span class="k">else</span> <span class="s1">&#39;where&#39;</span>
-    <span class="n">c</span> <span class="o">=</span> <span class="n">delegator</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_which</span><span class="p">,</span> <span class="n">command</span><span class="p">))</span>
+    <span class="n">_which</span> <span class="o">=</span> <span class="s2">&quot;which -a&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;nt&quot;</span> <span class="k">else</span> <span class="s2">&quot;where&quot;</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">delegator</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_which</span><span class="p">,</span> <span class="n">command</span><span class="p">))</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Which Not found...</span>
         <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span>
@@ -103,10 +108,10 @@
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">err</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">mult</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
 
 <span class="k">def</span> <span class="nf">datetime_parser</span><span class="p">(</span><span class="n">dct</span><span class="p">):</span>
@@ -122,7 +127,7 @@
 <div class="viewcode-block" id="DigitalOcean"><a class="viewcode-back" href="../index.html#doctl.DigitalOcean">[docs]</a><span class="k">class</span> <span class="nc">DigitalOcean</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;The DigitalOcean Client. Used to make all calls to doctcl.</span>
 
-<span class="sd">    ``token`` is optional — if none is given, the system-configured</span>
+<span class="sd">    ``token`` is optional — if none is given, the system-configured</span>
 <span class="sd">    authentication will be used, or the ``DIGITALOCEAN_ACCESS_TOKEN``</span>
 <span class="sd">    environment variable will be honored.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -140,7 +145,7 @@
 <span class="sd">        Return–code is always asserted to be ``0``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">doctl_location</span> <span class="o">=</span> <span class="n">system_which</span><span class="p">(</span><span class="s1">&#39;docutil&#39;</span><span class="p">)</span>
+        <span class="n">doctl_location</span> <span class="o">=</span> <span class="n">system_which</span><span class="p">(</span><span class="s2">&quot;docutil&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">doctl_location</span><span class="p">:</span>
             <span class="n">ensure_doctl</span><span class="p">()</span>
 
@@ -311,6 +316,7 @@
 
 <div class="viewcode-block" id="ComputeDomain"><a class="viewcode-back" href="../index.html#doctl.ComputeDomain">[docs]</a><span class="k">class</span> <span class="nc">ComputeDomain</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;domain is used to access domain commands.&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">do</span> <span class="o">=</span> <span class="n">do</span>
 
@@ -424,14 +430,16 @@
 
 
 <div class="viewcode-block" id="ComputeFirewall"><a class="viewcode-back" href="../index.html#doctl.ComputeFirewall">[docs]</a><span class="k">class</span> <span class="nc">ComputeFirewall</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Firewall is used to access firewall commands.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">do</span> <span class="o">=</span> <span class="n">do</span>
 
-    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;firewall&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeFirewall.get"><a class="viewcode-back" href="../index.html#doctl.ComputeFirewall.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get firewall.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;firewall&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span>
+<div class="viewcode-block" id="ComputeFirewall.create"><a class="viewcode-back" href="../index.html#doctl.ComputeFirewall.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">firewall_id</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
@@ -441,6 +449,7 @@
         <span class="n">outbound_rules</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tag_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create firewall.&quot;&quot;&quot;</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">droplet_ids</span><span class="p">:</span>
@@ -451,9 +460,9 @@
             <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--outboud-rules&quot;</span><span class="p">,</span> <span class="n">outbound_rules</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">tag_names</span><span class="p">:</span>
             <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--tag-names&quot;</span><span class="p">,</span> <span class="n">tag_names</span><span class="p">])</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;firewall&quot;</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;firewall&quot;</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
+<div class="viewcode-block" id="ComputeFirewall.update"><a class="viewcode-back" href="../index.html#doctl.ComputeFirewall.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">firewall_id</span><span class="p">,</span>
         <span class="n">name</span><span class="p">,</span>
@@ -462,6 +471,7 @@
         <span class="n">outbound_rules</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tag_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update firewall.&quot;&quot;&quot;</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">droplet_ids</span><span class="p">:</span>
@@ -472,21 +482,25 @@
             <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--outboud-rules&quot;</span><span class="p">,</span> <span class="n">outbound_rules</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">tag_names</span><span class="p">:</span>
             <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--tag-names&quot;</span><span class="p">,</span> <span class="n">tag_names</span><span class="p">])</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;firewall&quot;</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;firewall&quot;</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;firewall&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeFirewall.list"><a class="viewcode-back" href="../index.html#doctl.ComputeFirewall.list">[docs]</a>    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List firewalls.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;firewall&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">list_by_droplet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;firewall&quot;</span><span class="p">,</span> <span class="s2">&quot;list-by-droplet&quot;</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeFirewall.list_by_droplet"><a class="viewcode-back" href="../index.html#doctl.ComputeFirewall.list_by_droplet">[docs]</a>    <span class="k">def</span> <span class="nf">list_by_droplet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List firewalls by droplet ID.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;firewall&quot;</span><span class="p">,</span> <span class="s2">&quot;list-by-droplet&quot;</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeFirewall.delete"><a class="viewcode-back" href="../index.html#doctl.ComputeFirewall.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete firewall.&quot;&quot;&quot;</span>
         <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;firewall&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="s2">&quot;--force&quot;</span><span class="p">,</span> <span class="n">expect_json</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span></div>
 
-    <span class="k">def</span> <span class="nf">add_droplets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="n">droplet_ids</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeFirewall.add_droplets"><a class="viewcode-back" href="../index.html#doctl.ComputeFirewall.add_droplets">[docs]</a>    <span class="k">def</span> <span class="nf">add_droplets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="n">droplet_ids</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add droplets to the firewall.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">droplet_ids</span><span class="p">):</span>
             <span class="n">droplet_ids</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">droplet_ids</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
@@ -496,9 +510,10 @@
             <span class="n">firewall_id</span><span class="p">,</span>
             <span class="s2">&quot;--droplet-ids&quot;</span><span class="p">,</span>
             <span class="n">droplet_ids</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">remove_droplets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeFirewall.remove_droplets"><a class="viewcode-back" href="../index.html#doctl.ComputeFirewall.remove_droplets">[docs]</a>    <span class="k">def</span> <span class="nf">remove_droplets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove droplets from the firewall.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">droplet_ids</span><span class="p">):</span>
             <span class="n">droplet_ids</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">droplet_ids</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
@@ -508,17 +523,19 @@
             <span class="n">firewall_id</span><span class="p">,</span>
             <span class="s2">&quot;--droplet-ids&quot;</span><span class="p">,</span>
             <span class="n">droplet_ids</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">add_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="n">tag_names</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeFirewall.add_tags"><a class="viewcode-back" href="../index.html#doctl.ComputeFirewall.add_tags">[docs]</a>    <span class="k">def</span> <span class="nf">add_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="n">tag_names</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add tags from the firewall.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">tag_names</span><span class="p">):</span>
             <span class="n">tag_names</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tag_names</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;firewall&quot;</span><span class="p">,</span> <span class="s2">&quot;add-tags&quot;</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="s2">&quot;--tag-names&quot;</span><span class="p">,</span> <span class="n">droplet_ids</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">remove_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="n">tag_names</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeFirewall.remove_tags"><a class="viewcode-back" href="../index.html#doctl.ComputeFirewall.remove_tags">[docs]</a>    <span class="k">def</span> <span class="nf">remove_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="n">tag_names</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove tags from the firewall.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">tag_names</span><span class="p">):</span>
             <span class="n">tag_names</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tag_names</span><span class="p">)</span>
 
@@ -529,58 +546,76 @@
             <span class="n">firewall_id</span><span class="p">,</span>
             <span class="s2">&quot;--tag-names&quot;</span><span class="p">,</span>
             <span class="n">droplet_ids</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">add_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="n">inbound_rules</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outbound_rules</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeFirewall.add_rules"><a class="viewcode-back" href="../index.html#doctl.ComputeFirewall.add_rules">[docs]</a>    <span class="k">def</span> <span class="nf">add_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="n">inbound_rules</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outbound_rules</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add inbound/outbound rules to the firewall.&quot;&quot;&quot;</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">inbound_rules</span><span class="p">:</span>
             <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--inbound-rules&quot;</span><span class="p">,</span> <span class="n">inbound_rules</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">outbound_rules</span><span class="p">:</span>
             <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--outbound-rules&quot;</span><span class="p">,</span> <span class="n">outbound_rules</span><span class="p">])</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;firewall&quot;</span><span class="p">,</span> <span class="s2">&quot;add-rules&quot;</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;firewall&quot;</span><span class="p">,</span> <span class="s2">&quot;add-rules&quot;</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">remove_rules</span><span class="p">(</span><span class="n">firewall_id</span><span class="p">,</span> <span class="n">inbound_rules</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outbound_rules</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeFirewall.remove_rules"><a class="viewcode-back" href="../index.html#doctl.ComputeFirewall.remove_rules">[docs]</a>    <span class="k">def</span> <span class="nf">remove_rules</span><span class="p">(</span><span class="n">firewall_id</span><span class="p">,</span> <span class="n">inbound_rules</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outbound_rules</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove inbound/outbound rules to the firewall.&quot;&quot;&quot;</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">inbound_rules</span><span class="p">:</span>
             <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--inbound-rules&quot;</span><span class="p">,</span> <span class="n">inbound_rules</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">outbound_rules</span><span class="p">:</span>
             <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--outbound-rules&quot;</span><span class="p">,</span> <span class="n">outbound_rules</span><span class="p">])</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;firewall&quot;</span><span class="p">,</span> <span class="s2">&quot;remove-rules&quot;</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;firewall&quot;</span><span class="p">,</span> <span class="s2">&quot;remove-rules&quot;</span><span class="p">,</span> <span class="n">firewall_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ComputeFloatingIP"><a class="viewcode-back" href="../index.html#doctl.ComputeFloatingIP">[docs]</a><span class="k">class</span> <span class="nc">ComputeFloatingIP</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Floating-ip is used to access commands on floating IPs.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">do</span> <span class="o">=</span> <span class="n">do</span>
 
-    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip&quot;</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeFloatingIP.create"><a class="viewcode-back" href="../index.html#doctl.ComputeFloatingIP.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a floating IP.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip&quot;</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeFloatingIP.get"><a class="viewcode-back" href="../index.html#doctl.ComputeFloatingIP.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the details of a floating IP.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeFloatingIP.delete"><a class="viewcode-back" href="../index.html#doctl.ComputeFloatingIP.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete a floating IP address.&quot;&quot;&quot;</span>
         <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">,</span> <span class="n">expect_json</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span></div>
 
-    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeFloatingIP.list"><a class="viewcode-back" href="../index.html#doctl.ComputeFloatingIP.list">[docs]</a>    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List all floating IP addresses.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">ComputeFloatingIPAction</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Floating IP action commands.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">do</span> <span class="o">=</span> <span class="n">do</span>
 
     <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">,</span> <span class="n">action_id</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">,</span> <span class="n">action_id</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;Get the details&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
+            <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip-action&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">,</span> <span class="n">action_id</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">assign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip&quot;</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip-action&quot;</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">unassign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip&quot;</span><span class="p">,</span> <span class="s2">&quot;unassign&quot;</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip-action&quot;</span><span class="p">,</span> <span class="s2">&quot;unassign&quot;</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ComputeImage"><a class="viewcode-back" href="../index.html#doctl.ComputeImage">[docs]</a><span class="k">class</span> <span class="nc">ComputeImage</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Image commands.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">do</span> <span class="o">=</span> <span class="n">do</span>
@@ -613,6 +648,7 @@
 
 
 <div class="viewcode-block" id="ComputeImageAction"><a class="viewcode-back" href="../index.html#doctl.ComputeImageAction">[docs]</a><span class="k">class</span> <span class="nc">ComputeImageAction</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Compute commands are for controlling and managing infrastructure.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">do</span> <span class="o">=</span> <span class="n">do</span>
@@ -631,6 +667,7 @@
 
 
 <div class="viewcode-block" id="ComputeLoadBalancer"><a class="viewcode-back" href="../index.html#doctl.ComputeLoadBalancer">[docs]</a><span class="k">class</span> <span class="nc">ComputeLoadBalancer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Access load-balancer commands.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">do</span> <span class="o">=</span> <span class="n">do</span>
@@ -679,7 +716,7 @@
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;load-balancer&quot;</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="n">load_balancer_update</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
+<div class="viewcode-block" id="ComputeLoadBalancer.update"><a class="viewcode-back" href="../index.html#doctl.ComputeLoadBalancer.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">load_balancer_id</span><span class="p">,</span>
         <span class="n">name</span><span class="p">,</span>
@@ -692,6 +729,7 @@
         <span class="n">stricky_sessions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tag_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create load balancer.&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">droplet_ids</span><span class="p">):</span>
             <span class="n">droplet_ids</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">droplet_ids</span><span class="p">)</span>
@@ -718,18 +756,21 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;load-balancer&quot;</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="n">load_balancer_update</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;load-balancer&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeLoadBalancer.list"><a class="viewcode-back" href="../index.html#doctl.ComputeLoadBalancer.list">[docs]</a>    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List load balancer.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;load-balancer&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load_balancer_id</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeLoadBalancer.delete"><a class="viewcode-back" href="../index.html#doctl.ComputeLoadBalancer.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load_balancer_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete load balancer.&quot;&quot;&quot;</span>
         <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;load-balancer&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="n">load_balancer_id</span><span class="p">,</span> <span class="n">expect_json</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span></div>
 
-    <span class="k">def</span> <span class="nf">add_droplets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load_balancer_id</span><span class="p">,</span> <span class="n">droplet_ids</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeLoadBalancer.add_droplets"><a class="viewcode-back" href="../index.html#doctl.ComputeLoadBalancer.add_droplets">[docs]</a>    <span class="k">def</span> <span class="nf">add_droplets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load_balancer_id</span><span class="p">,</span> <span class="n">droplet_ids</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add droplets to the load balancer.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">droplet_ids</span><span class="p">):</span>
             <span class="n">droplet_ids</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">droplet_ids</span><span class="p">)</span>
 
@@ -739,9 +780,10 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;load-balancer&quot;</span><span class="p">,</span> <span class="s2">&quot;add-droplets&quot;</span><span class="p">,</span> <span class="n">load_balancer_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">remove_droplets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeLoadBalancer.remove_droplets"><a class="viewcode-back" href="../index.html#doctl.ComputeLoadBalancer.remove_droplets">[docs]</a>    <span class="k">def</span> <span class="nf">remove_droplets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove droplets from the load balancer.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">droplet_ids</span><span class="p">):</span>
             <span class="n">droplet_ids</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">droplet_ids</span><span class="p">)</span>
 
@@ -751,9 +793,10 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;load-balancer&quot;</span><span class="p">,</span> <span class="s2">&quot;remove-droplets&quot;</span><span class="p">,</span> <span class="n">load_balancer_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">add_forwarding_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load_balancer_id</span><span class="p">,</span> <span class="n">forwarding_rules</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeLoadBalancer.add_forwarding_rules"><a class="viewcode-back" href="../index.html#doctl.ComputeLoadBalancer.add_forwarding_rules">[docs]</a>    <span class="k">def</span> <span class="nf">add_forwarding_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load_balancer_id</span><span class="p">,</span> <span class="n">forwarding_rules</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add forwarding rules to the load balancer.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">forwarding_rules</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
             <span class="n">forwarding_rules</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                 <span class="p">[</span><span class="n">f</span><span class="s2">&quot;</span><span class="si">{k}</span><span class="s2">:</span><span class="si">{v}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">forwarding_rules</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
@@ -765,9 +808,10 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;load-balancer&quot;</span><span class="p">,</span> <span class="s2">&quot;add-forwarding-rules&quot;</span><span class="p">,</span> <span class="n">load_balancer_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">remove_forwarding_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load_balancer_id</span><span class="p">,</span> <span class="n">forwarding_rules</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeLoadBalancer.remove_forwarding_rules"><a class="viewcode-back" href="../index.html#doctl.ComputeLoadBalancer.remove_forwarding_rules">[docs]</a>    <span class="k">def</span> <span class="nf">remove_forwarding_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load_balancer_id</span><span class="p">,</span> <span class="n">forwarding_rules</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove forwarding rules from the load balancer.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">forwarding_rules</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
             <span class="n">forwarding_rules</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                 <span class="p">[</span><span class="n">f</span><span class="s2">&quot;</span><span class="si">{k}</span><span class="s2">:</span><span class="si">{v}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">forwarding_rules</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
@@ -785,54 +829,63 @@
             <span class="o">*</span><span class="n">args</span><span class="p">,</span>
             <span class="n">expect_json</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span></div>
+        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span></div></div>
 
 
 <div class="viewcode-block" id="ComputePlugin"><a class="viewcode-back" href="../index.html#doctl.ComputePlugin">[docs]</a><span class="k">class</span> <span class="nc">ComputePlugin</span><span class="p">:</span>
-
+    <span class="sd">&quot;&quot;&quot;Access plugin commands.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">do</span> <span class="o">=</span> <span class="n">do</span>
 
-    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;plugin&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputePlugin.list"><a class="viewcode-back" href="../index.html#doctl.ComputePlugin.list">[docs]</a>    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List plugins.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;plugin&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugin_name</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;plugin&quot;</span><span class="p">,</span> <span class="s2">&quot;run&quot;</span><span class="p">,</span> <span class="n">plugin_name</span><span class="p">)</span></div>
+<div class="viewcode-block" id="ComputePlugin.run"><a class="viewcode-back" href="../index.html#doctl.ComputePlugin.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugin_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run plugin.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;plugin&quot;</span><span class="p">,</span> <span class="s2">&quot;run&quot;</span><span class="p">,</span> <span class="n">plugin_name</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ComputeSnapshot"><a class="viewcode-back" href="../index.html#doctl.ComputeSnapshot">[docs]</a><span class="k">class</span> <span class="nc">ComputeSnapshot</span><span class="p">:</span>
-
+    <span class="sd">&quot;&quot;&quot;Access snapshot commands.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">do</span> <span class="o">=</span> <span class="n">do</span>
 
-    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;snapshot&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeSnapshot.list"><a class="viewcode-back" href="../index.html#doctl.ComputeSnapshot.list">[docs]</a>    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List snapshots.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;snapshot&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_id</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;snapshot&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">snapshot_id</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeSnapshot.get"><a class="viewcode-back" href="../index.html#doctl.ComputeSnapshot.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get snapshots.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;snapshot&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">snapshot_id</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_id</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeSnapshot.delete"><a class="viewcode-back" href="../index.html#doctl.ComputeSnapshot.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete snapshots.&quot;&quot;&quot;</span>
         <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">,</span> <span class="n">expect_json</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span></div>
+        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span></div></div>
 
 
 <div class="viewcode-block" id="ComputeSSHKey"><a class="viewcode-back" href="../index.html#doctl.ComputeSSHKey">[docs]</a><span class="k">class</span> <span class="nc">ComputeSSHKey</span><span class="p">:</span>
-
+    <span class="sd">&quot;&quot;&quot;Access ssh key commands&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">do</span> <span class="o">=</span> <span class="n">do</span>
 
-    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;ssh-key&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeSSHKey.list"><a class="viewcode-back" href="../index.html#doctl.ComputeSSHKey.list">[docs]</a>    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List ssh keys.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;ssh-key&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key_id</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;ssh-key&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">key_id</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeSSHKey.get"><a class="viewcode-back" href="../index.html#doctl.ComputeSSHKey.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get ssh key.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;ssh-key&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">key_id</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key_name</span><span class="p">,</span> <span class="n">public_key</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeSSHKey.create"><a class="viewcode-back" href="../index.html#doctl.ComputeSSHKey.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key_name</span><span class="p">,</span> <span class="n">public_key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create ssh key.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;ssh-key&quot;</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="n">key_name</span><span class="p">,</span> <span class="s2">&quot;--public-key&quot;</span><span class="p">,</span> <span class="n">public_key</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_import</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key_name</span><span class="p">,</span> <span class="n">public_key_file</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Import ssh key.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span>
             <span class="s2">&quot;ssh-key&quot;</span><span class="p">,</span>
@@ -842,69 +895,79 @@
             <span class="n">public_key_file</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key_id</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeSSHKey.delete"><a class="viewcode-back" href="../index.html#doctl.ComputeSSHKey.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete ssh key.&quot;&quot;&quot;</span>
         <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;ssh-key&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="n">key_id</span><span class="p">,</span> <span class="s2">&quot;--force&quot;</span><span class="p">,</span> <span class="n">expect_json</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span></div>
+        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span></div></div>
 
 
 <div class="viewcode-block" id="ComputeTag"><a class="viewcode-back" href="../index.html#doctl.ComputeTag">[docs]</a><span class="k">class</span> <span class="nc">ComputeTag</span><span class="p">:</span>
-
+    <span class="sd">&quot;&quot;&quot;Access tag commands.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">do</span> <span class="o">=</span> <span class="n">do</span>
 
-    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag_name</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;tag&quot;</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="n">tag_name</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeTag.create"><a class="viewcode-back" href="../index.html#doctl.ComputeTag.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create tag.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;tag&quot;</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="n">tag_name</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag_name</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;tag&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">tag_name</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeTag.get"><a class="viewcode-back" href="../index.html#doctl.ComputeTag.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get tag.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;tag&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">tag_name</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;tag&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeTag.list"><a class="viewcode-back" href="../index.html#doctl.ComputeTag.list">[docs]</a>    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List tags.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;tag&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag_name</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeTag.delete"><a class="viewcode-back" href="../index.html#doctl.ComputeTag.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete tag.&quot;&quot;&quot;</span>
         <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;tag&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="n">tag_name</span><span class="p">,</span> <span class="s2">&quot;--force&quot;</span><span class="p">,</span> <span class="n">expect_json</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span></div>
+        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span></div></div>
 
 
 <div class="viewcode-block" id="ComputeVolume"><a class="viewcode-back" href="../index.html#doctl.ComputeVolume">[docs]</a><span class="k">class</span> <span class="nc">ComputeVolume</span><span class="p">:</span>
-
+    <span class="sd">&quot;&quot;&quot;Access volume commands.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">do</span> <span class="o">=</span> <span class="n">do</span>
 
-    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;volume&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeVolume.list"><a class="viewcode-back" href="../index.html#doctl.ComputeVolume.list">[docs]</a>    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List volume.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;volume&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">volume_name</span><span class="p">,</span> <span class="n">region</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeVolume.create"><a class="viewcode-back" href="../index.html#doctl.ComputeVolume.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">volume_name</span><span class="p">,</span> <span class="n">region</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a volume.&quot;&quot;&quot;</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--region&quot;</span><span class="p">,</span> <span class="n">region</span><span class="p">])</span>
         <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--size&quot;</span><span class="p">,</span> <span class="n">size</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">description</span><span class="p">:</span>
             <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--description&quot;</span><span class="p">,</span> <span class="n">description</span><span class="p">])</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;volume&quot;</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="n">volume_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;volume&quot;</span><span class="p">,</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="n">volume_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">volume_id</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeVolume.delete"><a class="viewcode-back" href="../index.html#doctl.ComputeVolume.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">volume_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete a volume.&quot;&quot;&quot;</span>
         <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;volume&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="n">volume_id</span><span class="p">,</span> <span class="s2">&quot;--force&quot;</span><span class="p">,</span> <span class="n">expect_json</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span></div>
 
-    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">volume_id</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;volume&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">volume_id</span><span class="p">)</span>
+<div class="viewcode-block" id="ComputeVolume.get"><a class="viewcode-back" href="../index.html#doctl.ComputeVolume.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">volume_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a volume.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;volume&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">volume_id</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">volume_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeVolume.snapshot"><a class="viewcode-back" href="../index.html#doctl.ComputeVolume.snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">volume_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a volume snapshot.&quot;&quot;&quot;</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--snapshot-name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">description</span><span class="p">:</span>
             <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;--snapshot-desc&quot;</span><span class="p">,</span> <span class="n">description</span><span class="p">])</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;volume&quot;</span><span class="p">,</span> <span class="s2">&quot;snapshot&quot;</span><span class="p">,</span> <span class="n">volume_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;volume&quot;</span><span class="p">,</span> <span class="s2">&quot;snapshot&quot;</span><span class="p">,</span> <span class="n">volume_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ComputeVolumeAction"><a class="viewcode-back" href="../index.html#doctl.ComputeVolumeAction">[docs]</a><span class="k">class</span> <span class="nc">ComputeVolumeAction</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;volume-action is used to access volume action commands&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Access volume action commands.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">do</span> <span class="o">=</span> <span class="n">do</span>
@@ -941,7 +1004,9 @@
             <span class="n">size</span><span class="p">,</span>
         <span class="p">)</span></div></div>
 
+
 <span class="c1"># self.account = ComputeAccount(do=self.do)</span>
+
 
 <div class="viewcode-block" id="Compute"><a class="viewcode-back" href="../index.html#doctl.Compute">[docs]</a><span class="k">class</span> <span class="nc">Compute</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;compute commands are for controlling and managing infrastructure</span>
@@ -953,6 +1018,7 @@
 <span class="sd">    :ivar domain_records: interacting with an individual domain (:class:`ComputeDomainRecords`).</span>
 <span class="sd">    :ivar firewall: access firewall commands (:class:`ComputeFirewallAccess`).</span>
 <span class="sd">    :ivar floating_ip: access commands on floating IPs (:class:`ComputeFloatingIP`).</span>
+<span class="sd">    :ivar floating_ip_action: floating IP action commands (:class:`ComputeFloatingIPAction`).</span>
 <span class="sd">    :ivar image: image commands (:class:`ComputeImage`).</span>
 <span class="sd">    :ivar image_action: image-action commands (:class:`ComputeImageAction`).</span>
 <span class="sd">    :ivar load_balancer: access load-balancer commands (:class:`ComputeLoadBalancer`).</span>
@@ -973,6 +1039,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">domain_records</span> <span class="o">=</span> <span class="n">ComputeDomainRecords</span><span class="p">(</span><span class="n">do</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">firewall</span> <span class="o">=</span> <span class="n">ComputeFirewall</span><span class="p">(</span><span class="n">do</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">floating_ip</span> <span class="o">=</span> <span class="n">ComputeFloatingIP</span><span class="p">(</span><span class="n">do</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">floating_ip_action</span> <span class="o">=</span> <span class="n">ComputeFloatingIPAction</span><span class="p">(</span><span class="n">do</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">ComputeImage</span><span class="p">(</span><span class="n">do</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">image_action</span> <span class="o">=</span> <span class="n">ComputeImageAction</span><span class="p">(</span><span class="n">do</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_balancer</span> <span class="o">=</span> <span class="n">ComputeLoadBalancer</span><span class="p">(</span><span class="n">do</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="p">)</span>
@@ -989,6 +1056,7 @@
     <span class="k">def</span> <span class="nf">size_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="Account"><a class="viewcode-back" href="../index.html#doctl.Account">[docs]</a><span class="k">class</span> <span class="nc">Account</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;account is used to access account commands.&quot;&quot;&quot;</span>
 
@@ -1003,11 +1071,13 @@
         <span class="sd">&quot;&quot;&quot;get API rate limits.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;account&quot;</span><span class="p">,</span> <span class="s2">&quot;ratelimit&quot;</span><span class="p">)</span></div></div>
 
+
 <span class="n">compute</span> <span class="o">=</span> <span class="n">Compute</span><span class="p">()</span>
 <span class="n">account</span> <span class="o">=</span> <span class="n">Account</span><span class="p">()</span>
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -1041,7 +1111,7 @@
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
     </div>
 
