@@ -99,6 +99,9 @@ Compute Classes
 .. autoclass:: ComputeFloatingIP
     :members:
 
+.. autoclass:: ComputeFloatingIPAction
+    :members:
+
 .. autoclass:: ComputeImage
     :members:
 

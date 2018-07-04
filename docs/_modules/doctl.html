@@ -595,23 +595,23 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">)</span></div></div>
 
 
-<span class="k">class</span> <span class="nc">ComputeFloatingIPAction</span><span class="p">:</span>
+<div class="viewcode-block" id="ComputeFloatingIPAction"><a class="viewcode-back" href="../index.html#doctl.ComputeFloatingIPAction">[docs]</a><span class="k">class</span> <span class="nc">ComputeFloatingIPAction</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Floating IP action commands.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">do</span> <span class="o">=</span> <span class="n">do</span>
 
-    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">,</span> <span class="n">action_id</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeFloatingIPAction.get"><a class="viewcode-back" href="../index.html#doctl.ComputeFloatingIPAction.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">,</span> <span class="n">action_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the details&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span>
             <span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip-action&quot;</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">,</span> <span class="n">action_id</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">assign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip-action&quot;</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">,</span> <span class="n">droplet_id</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">unassign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip-action&quot;</span><span class="p">,</span> <span class="s2">&quot;unassign&quot;</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">doctl</span><span class="p">(</span><span class="s2">&quot;compute&quot;</span><span class="p">,</span> <span class="s2">&quot;floating-ip-action&quot;</span><span class="p">,</span> <span class="s2">&quot;unassign&quot;</span><span class="p">,</span> <span class="n">floating_ip</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ComputeImage"><a class="viewcode-back" href="../index.html#doctl.ComputeImage">[docs]</a><span class="k">class</span> <span class="nc">ComputeImage</span><span class="p">:</span>
