@@ -581,6 +581,8 @@ class ComputeFloatingIPAction:
 
 
 class ComputeImage:
+    """Image commands."""
+
     def __init__(self, do):
         self.do = do
 
@@ -612,6 +614,8 @@ class ComputeImage:
 
 
 class ComputeImageAction:
+    """Compute commands are for controlling and managing infrastructure."""
+
     def __init__(self, do):
         self.do = do
 
@@ -629,6 +633,8 @@ class ComputeImageAction:
 
 
 class ComputeLoadBalancer:
+    """Access load-balancer commands."""
+
     def __init__(self, do):
         self.do = do
 
@@ -689,6 +695,7 @@ class ComputeLoadBalancer:
         stricky_sessions=None,
         tag_name=None,
     ):
+        """Create load balancer."""
 
         if not isinstance(str, droplet_ids):
             droplet_ids = ",".join(droplet_ids)
@@ -718,15 +725,18 @@ class ComputeLoadBalancer:
         )
 
     def list(self):
+        """List load balancer."""
         return self.do.doctl("compute", "load-balancer", "list")
 
     def delete(self, load_balancer_id):
+        """Delete load balancer."""
         c = self.do.doctl(
             "compute", "load-balancer", "delete", load_balancer_id, expect_json=False
         )
         return c.return_code == 0
 
     def add_droplets(self, load_balancer_id, droplet_ids):
+        """Add droplets to the load balancer."""
         if not isinstance(str, droplet_ids):
             droplet_ids = ",".join(droplet_ids)
 
@@ -739,6 +749,7 @@ class ComputeLoadBalancer:
         )
 
     def remove_droplets(self):
+        """Remove droplets from the load balancer."""
         if not isinstance(str, droplet_ids):
             droplet_ids = ",".join(droplet_ids)
 
@@ -751,6 +762,7 @@ class ComputeLoadBalancer:
         )
 
     def add_forwarding_rules(self, load_balancer_id, forwarding_rules=None):
+        """Add forwarding rules to the load balancer."""
         if hasattr(forwarding_rules, items):
             forwarding_rules = ",".join(
                 [f"{k}:{v}" for (k, v) in forwarding_rules.items()]
@@ -765,6 +777,7 @@ class ComputeLoadBalancer:
         )
 
     def remove_forwarding_rules(self, load_balancer_id, forwarding_rules=None):
+        """Remove forwarding rules from the load balancer."""
         if hasattr(forwarding_rules, items):
             forwarding_rules = ",".join(
                 [f"{k}:{v}" for (k, v) in forwarding_rules.items()]
@@ -786,47 +799,59 @@ class ComputeLoadBalancer:
 
 
 class ComputePlugin:
+    """Access plugin commands."""
     def __init__(self, do):
         self.do = do
 
     def list(self):
+        """List plugins."""
         return self.do.doctl("compute", "plugin", "list")
 
     def run(self, plugin_name):
+        """Run plugin."""
         return self.do.doctl("compute", "plugin", "run", plugin_name)
 
 
 class ComputeSnapshot:
+    """Access snapshot commands."""
     def __init__(self, do):
         self.do = do
 
     def list(self):
+        """List snapshots."""
         return self.do.doctl("compute", "snapshot", "list")
 
     def get(self, snapshot_id):
+        """Get snapshots."""
         return self.do.doctl("compute", "snapshot", "get", snapshot_id)
 
     def delete(self, snapshot_id):
+        """Delete snapshots."""
         c = self.do.doctl("compute", "size", "list", expect_json=False)
         return c.return_code == 0
 
 
 class ComputeSSHKey:
+    """Access ssh key commands"""
     def __init__(self, do):
         self.do = do
 
     def list(self):
+        """List ssh keys."""
         return self.do.doctl("compute", "ssh-key", "list")
 
     def get(self, key_id):
+        """Get ssh key."""
         return self.do.doctl("compute", "ssh-key", "get", key_id)
 
     def create(self, key_name, public_key):
+        """Create ssh key."""
         return self.do.doctl(
             "compute", "ssh-key", "create", key_name, "--public-key", public_key
         )
 
     def _import(self, key_name, public_key_file):
+        """Import ssh key."""
         return self.do.doctl(
             "compute",
             "ssh-key",
@@ -837,6 +862,7 @@ class ComputeSSHKey:
         )
 
     def delete(self, key_id):
+        """Delete ssh key."""
         c = self.do.doctl(
             "compute", "ssh-key", "delete", key_id, "--force", expect_json=False
         )
@@ -844,19 +870,24 @@ class ComputeSSHKey:
 
 
 class ComputeTag:
+    """Access tag commands."""
     def __init__(self, do):
         self.do = do
 
     def create(self, tag_name):
+        """Create tag."""
         return self.do.doctl("compute", "tag", "create", tag_name)
 
     def get(self, tag_name):
+        """Get tag."""
         return self.do.doctl("compute", "tag", "get", tag_name)
 
     def list(self):
+        """List tags."""
         return self.do.doctl("compute", "tag", "list")
 
     def delete(self, tag_name):
+        """Delete tag."""
         c = self.do.doctl(
             "compute", "tag", "delete", tag_name, "--force", expect_json=False
         )
@@ -864,13 +895,16 @@ class ComputeTag:
 
 
 class ComputeVolume:
+    """Access volume commands."""
     def __init__(self, do):
         self.do = do
 
     def list(self):
+        """List volume."""
         return self.do.doctl("compute", "volume", "list")
 
     def create(self, volume_name, region, size, description=None):
+        """Create a volume."""
         args = []
         args.extend(["--region", region])
         args.extend(["--size", size])
@@ -879,15 +913,18 @@ class ComputeVolume:
         return self.do.doctl("compute", "volume", "create", volume_name, *args)
 
     def delete(self, volume_id):
+        """Delete a volume."""
         c = self.do.doctl(
             "compute", "volume", "delete", volume_id, "--force", expect_json=False
         )
         return c.return_code == 0
 
     def get(self, volume_id):
+        """Get a volume."""
         return self.do.doctl("compute", "volume", "get", volume_id)
 
     def snapshot(self, volume_id, name, description=None):
+        """Create a volume snapshot."""
         args = []
         args.extend(["--snapshot-name", name])
         if description:
@@ -896,7 +933,7 @@ class ComputeVolume:
 
 
 class ComputeVolumeAction:
-    """volume-action is used to access volume action commands"""
+    """Access volume action commands."""
 
     def __init__(self, do):
         self.do = do

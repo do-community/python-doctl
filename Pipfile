@@ -10,7 +10,7 @@ black = "*"
 ipython = "*"
 sphinx = "*"
 twine = "*"
-doctl = {path="."}
+doctl = {editable = true, path = "."}
 
 [requires]
 python_version = "3.7"
