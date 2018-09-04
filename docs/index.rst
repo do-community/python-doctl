@@ -18,7 +18,7 @@ Please enjoy!
 Installation
 ------------
 
-Fist, ensure you have ``doctl`` installed on your system, then you can add ``python-doctl`` to your project with `Pipenv <https://pipenv.org/>`::
+Fist, ensure you have ``doctl`` installed on your system, then you can add ``python-doctl`` to your project with `Pipenv <https://pipenv.org/>`_::
 
     $ pipenv install doctl
 
