@@ -7,15 +7,15 @@ import sys
 import tarfile
 from tempfile import NamedTemporaryFile
 
-import appdirs
-import requests
+# import appdirs
+# import requests
 
 import delegator
 import maya
-import requests_html
+# import requests_html
 
 requests = requests.Session()
-html_session = requests_html.HTMLSession()
+# html_session = requests_html.HTMLSession()
 
 BIN_CACHE = appdirs.user_cache_dir("python-doctl", "Kenneth Reitz")
 os.environ["PATH"] = f'{BIN_CACHE}:{os.environ["PATH"]}'
