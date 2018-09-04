@@ -96,6 +96,8 @@
         <span class="n">tar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 
+
+
 <span class="k">def</span> <span class="nf">system_which</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">mult</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Emulates the system&#39;s which. Returns None if not found.&quot;&quot;&quot;</span>
     <span class="n">_which</span> <span class="o">=</span> <span class="s2">&quot;which -a&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;nt&quot;</span> <span class="k">else</span> <span class="s2">&quot;where&quot;</span>
