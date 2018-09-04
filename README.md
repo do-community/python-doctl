@@ -1,7 +1,7 @@
 python-doctl
 ============
 
-A Python wrapper for the excellent [doctl](https://github.com/digitalocean/doctl) command-line utility, from [Digital Ocean](https://digitalocean.com).
+A Python wrapper for the excellent [doctl](https://github.com/digitalocean/doctl) command-line utility, from [DigitalOcean](https://digitalocean.com).
 
 Usage
 -----
