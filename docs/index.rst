@@ -22,8 +22,8 @@ Fist, ensure you have ``doctl`` installed on your system, then you can add ``pyt
 
     $ pipenv install doctl
 
-Example Usage
--------------
+Introduction
+------------
 
 The ``DIGITALOCEAN_ACCESS_TOKEN`` environment variable will automatically be honored.
 
@@ -49,7 +49,11 @@ Alternatively, you can pass a token in explicitly:
     >>> from doctl import DigitalOcean
     >>> doctl = DigitalOcean(token="xxxxx")
 
-All methods return Python data structures, includinging timezone–aware Datetime objects.
+Things to Know
+++++++++++++++
+
+- All reasonable ``doctl`` commands are available as methods on within the ``doctl``. Sub–commands are referenced with another method call (e.g. ``doctl.compute.ssh_key.list()``.
+- All methods return Python data structures, includinging timezone–aware Datetime objects.
 
 Notes
 -----

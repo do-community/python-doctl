@@ -45,8 +45,8 @@
 </pre></div>
 </div>
 </div>
-<div class="section" id="example-usage">
-<h2>Example Usage<a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">DIGITALOCEAN_ACCESS_TOKEN</span></code> environment variable will automatically be honored.</p>
 <blockquote>
 <div><p>$ export DIGITALOCEAN_ACCESS_TOKEN=xxxx</p>
@@ -74,7 +74,13 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doctl</span> <span class="o">=</span> <span class="n">DigitalOcean</span><span class="p">(</span><span class="n">token</span><span class="o">=</span><span class="s2">&quot;xxxxx&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>All methods return Python data structures, includinging timezone–aware Datetime objects.</p>
+<div class="section" id="things-to-know">
+<h3>Things to Know<a class="headerlink" href="#things-to-know" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>All reasonable <code class="docutils literal notranslate"><span class="pre">doctl</span></code> commands are available as methods on within the <code class="docutils literal notranslate"><span class="pre">doctl</span></code>. Sub–commands are referenced with another method call (e.g. <code class="docutils literal notranslate"><span class="pre">doctl.compute.ssh_key.list()</span></code>.</li>
+<li>All methods return Python data structures, includinging timezone–aware Datetime objects.</li>
+</ul>
+</div>
 </div>
 <div class="section" id="notes">
 <h2>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h2>
@@ -712,7 +718,10 @@ Otherwise, JSON output will be parsed and the results will be returned.</p>
   <ul>
 <li><a class="reference internal" href="#">python-doctl</a><ul>
 <li><a class="reference internal" href="#installation">Installation</a></li>
-<li><a class="reference internal" href="#example-usage">Example Usage</a></li>
+<li><a class="reference internal" href="#introduction">Introduction</a><ul>
+<li><a class="reference internal" href="#things-to-know">Things to Know</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#notes">Notes</a></li>
 </ul>
 </li>
