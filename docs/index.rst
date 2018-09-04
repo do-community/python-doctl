@@ -6,7 +6,7 @@
 python-doctl
 ============
 
-A Python wrapper for the excellent `doctl <https://github.com/slantview/doctl>`_ command-line utility, from
+A Python wrapper for the excellent `doctl <https://github.com/digitalocean/doctl>`_ command-line utility, from
 `Digital Ocean <https://digitalocean.com>`_.
 
 -----------------------
