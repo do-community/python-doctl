@@ -21,11 +21,7 @@ Usage
     thoth
     macbook
 
-Features
---------
-
-- Automatically downloads `doctl`, if unavailable for your system (at runtime).
-- All methods return Python data structures, includinging timezone–aware Datetime objects.
+All methods return Python data structures, includinging timezone–aware Datetime objects.
 
 Notes
 -----

@@ -60,6 +60,31 @@ Notes
 
 Use of the ``DIGITALOCEAN_ACCESS_TOKEN`` environment variable is recommended.
 
+Available Namespaces
+--------------------
+
+The entire API surface of ``doctl`` is covered by this library, so the following
+namespaces are available for your use and enjoyment:
+
+- ``compute.account``
+- ``compute.action``
+- ``compute.certificate``
+- ``compute.domain``
+- ``compute.domain_records``
+- ``compute.droplet``
+- ``compute.firewall``
+- ``compute.floating_ip``
+- ``compute.image``
+- ``compute.image_action``
+- ``compute.load_balancer``
+- ``compute.plugin``
+- ``compute.region_list``
+- ``compute.size_list``
+- ``compute.snapshot``
+- ``compute.ssh_key``
+- ``compute.tag``
+- ``compute.volume``
+- ``compute.volume_action``
 
 API Documentation
 =================
