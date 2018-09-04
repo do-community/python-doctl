@@ -67,33 +67,33 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">out</span>
 
 
-<span class="k">def</span> <span class="nf">ensure_doctl</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Attempts to download docutil from GitHub, and store it in the</span>
-<span class="sd">    user&#39;s cache directory.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Fetching latest docutil release…&quot;</span><span class="p">)</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">html_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://github.com/digitalocean/doctl/releases&quot;</span><span class="p">)</span>
-    <span class="n">candidates</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
-        <span class="s2">&quot;#js-repo-pjax-container &gt; div.container.new-discussion-timeline.experiment-repo-nav &gt; div.repository-content &gt; div.position-relative.border-top &gt; div.release.clearfix.label-latest &gt; div.release-body.commit.open.float-left &gt; div.my-4 &gt; ul&quot;</span><span class="p">,</span>
-        <span class="n">first</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">absolute_links</span>
+<span class="c1"># def ensure_doctl():</span>
+<span class="c1">#     &quot;&quot;&quot;Attempts to download docutil from GitHub, and store it in the</span>
+<span class="c1">#     user&#39;s cache directory.</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     logging.info(&quot;Fetching latest docutil release…&quot;)</span>
+<span class="c1">#     r = html_session.get(&quot;https://github.com/digitalocean/doctl/releases&quot;)</span>
+<span class="c1">#     candidates = r.html.find(</span>
+<span class="c1">#         &quot;#js-repo-pjax-container &gt; div.container.new-discussion-timeline.experiment-repo-nav &gt; div.repository-content &gt; div.position-relative.border-top &gt; div.release.clearfix.label-latest &gt; div.release-body.commit.open.float-left &gt; div.my-4 &gt; ul&quot;,</span>
+<span class="c1">#         first=True,</span>
+<span class="c1">#     ).absolute_links</span>
 
-    <span class="n">asset</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="ow">in</span> <span class="n">candidate</span> <span class="ow">and</span> <span class="s2">&quot;sha256&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">candidate</span><span class="p">:</span>
-            <span class="n">asset</span> <span class="o">=</span> <span class="n">candidate</span>
+<span class="c1">#     asset = None</span>
+<span class="c1">#     for candidate in candidates:</span>
+<span class="c1">#         if sys.platform in candidate and &quot;sha256&quot; not in candidate:</span>
+<span class="c1">#             asset = candidate</span>
 
-    <span class="k">if</span> <span class="n">asset</span><span class="p">:</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Installation candidate found!&quot;</span><span class="p">)</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">asset</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">tarball</span> <span class="o">=</span> <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tarball</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+<span class="c1">#     if asset:</span>
+<span class="c1">#         logging.info(&quot;Installation candidate found!&quot;)</span>
+<span class="c1">#         r = requests.get(asset, stream=False)</span>
+<span class="c1">#         tarball = NamedTemporaryFile(delete=False)</span>
+<span class="c1">#         with open(tarball.name, &quot;wb&quot;) as f:</span>
+<span class="c1">#             f.write(r.content)</span>
 
-        <span class="n">tar</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">tarball</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;r|gz&quot;</span><span class="p">)</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Extracting docutil installation…&quot;</span><span class="p">)</span>
-        <span class="n">tar</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">BIN_CACHE</span><span class="p">)</span>
-        <span class="n">tar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="c1">#         tar = tarfile.open(tarball.name, &quot;r|gz&quot;)</span>
+<span class="c1">#         logging.info(&quot;Extracting docutil installation…&quot;)</span>
+<span class="c1">#         tar.extractall(path=BIN_CACHE)</span>
+<span class="c1">#         tar.close()</span>
 
 
 
@@ -147,9 +147,10 @@
 <span class="sd">        Return–code is always asserted to be ``0``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">doctl_location</span> <span class="o">=</span> <span class="n">system_which</span><span class="p">(</span><span class="s2">&quot;docutil&quot;</span><span class="p">)</span>
+        <span class="n">doctl_location</span> <span class="o">=</span> <span class="n">system_which</span><span class="p">(</span><span class="s2">&quot;doctl&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">doctl_location</span><span class="p">:</span>
-            <span class="n">ensure_doctl</span><span class="p">()</span>
+            <span class="c1"># ensure_doctl()</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;doctl does not appear to be installed and on your PATH!&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">expect_json</span><span class="p">:</span>
             <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>

@@ -18,14 +18,16 @@ Please enjoy!
 Installation
 ------------
 
-::
+Fist, ensure you have ``doctl`` installed on your system, then you can add ``python-doctl`` to your project with `Pipenv <https://pipenv.org/>`::
 
     $ pipenv install doctl
 
-If `doctl` isn't found on your system, the latest version will be bootstrapped automatically at runtime.
-
 Example Usage
 -------------
+
+The ``DIGITALOCEAN_ACCESS_TOKEN`` environment variable will automatically be honored.
+
+    $ export DIGITALOCEAN_ACCESS_TOKEN=xxxx
 
     >>> import doctl
 
@@ -41,6 +43,11 @@ Example Usage
     Blink (iPad)
     thoth
     macbook
+
+Alternatively, you can pass a token in explicitly:
+
+    >>> from doctl import DigitalOcean
+    >>> doctl = DigitalOcean(token="xxxxx")
 
 Features
 --------

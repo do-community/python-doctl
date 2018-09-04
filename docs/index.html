@@ -40,13 +40,16 @@
 <p>Please enjoy!</p>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Fist, ensure you have <code class="docutils literal notranslate"><span class="pre">doctl</span></code> installed on your system, then you can add <code class="docutils literal notranslate"><span class="pre">python-doctl</span></code> to your project with <cite>Pipenv &lt;https://pipenv.org/&gt;</cite>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pipenv install doctl
 </pre></div>
 </div>
-<p>If <cite>doctl</cite> isn’t found on your system, the latest version will be bootstrapped automatically at runtime.</p>
 </div>
 <div class="section" id="example-usage">
 <h2>Example Usage<a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">DIGITALOCEAN_ACCESS_TOKEN</span></code> environment variable will automatically be honored.</p>
+<blockquote>
+<div><p>$ export DIGITALOCEAN_ACCESS_TOKEN=xxxx</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">doctl</span>
 </pre></div>
 </div>
@@ -63,6 +66,12 @@
 <span class="go">Blink (iPad)</span>
 <span class="go">thoth</span>
 <span class="go">macbook</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Alternatively, you can pass a token in explicitly:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">doctl</span> <span class="k">import</span> <span class="n">DigitalOcean</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doctl</span> <span class="o">=</span> <span class="n">DigitalOcean</span><span class="p">(</span><span class="n">token</span><span class="o">=</span><span class="s2">&quot;xxxxx&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
