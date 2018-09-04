@@ -6,11 +6,8 @@
 python-doctl
 ============
 
-A Python wrapper for the excellent `doctl`_ command-line utility, from
-`Digital Ocean`_.
-
-.. _doctl: https://github.com/slantview/doctl
-.. _Digital Ocean: https://digitalocean.com
+A Python wrapper for the excellent `doctl <https://github.com/slantview/doctl>`_ command-line utility, from
+`Digital Ocean <https://digitalocean.com>`_.
 
 -----------------------
 
