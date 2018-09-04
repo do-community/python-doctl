@@ -52,7 +52,7 @@ Alternatively, you can pass a token in explicitly:
 Things to Know
 ++++++++++++++
 
-- All reasonable ``doctl`` commands are available as methods on within the ``doctl``. Sub–commands are referenced with another method call (e.g. ``doctl.compute.ssh_key.list()``.
+- All reasonable ``doctl`` commands are available as methods on within the ``doctl`` module. Sub–commands are referenced with another method call (e.g. ``doctl.compute.ssh_key.list()``.
 - All methods return Python data structures, includinging timezone–aware Datetime objects.
 
 Notes
