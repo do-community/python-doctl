@@ -11,12 +11,6 @@ import delegator
 import maya
 
 
-try:
-    os.makedirs(BIN_CACHE)
-except FileExistsError:
-    pass
-
-
 class DOCtlError(RuntimeError):
     def __init__(self, c):
         self.c = c
