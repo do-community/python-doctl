@@ -33,33 +33,33 @@ class DOCtlError(RuntimeError):
         self.output = c.out
 
 
-def ensure_doctl():
-    """Attempts to download docutil from GitHub, and store it in the
-    user's cache directory.
-    """
-    logging.info("Fetching latest docutil release…")
-    r = html_session.get("https://github.com/digitalocean/doctl/releases")
-    candidates = r.html.find(
-        "#js-repo-pjax-container > div.container.new-discussion-timeline.experiment-repo-nav > div.repository-content > div.position-relative.border-top > div.release.clearfix.label-latest > div.release-body.commit.open.float-left > div.my-4 > ul",
-        first=True,
-    ).absolute_links
+# def ensure_doctl():
+#     """Attempts to download docutil from GitHub, and store it in the
+#     user's cache directory.
+#     """
+#     logging.info("Fetching latest docutil release…")
+#     r = html_session.get("https://github.com/digitalocean/doctl/releases")
+#     candidates = r.html.find(
+#         "#js-repo-pjax-container > div.container.new-discussion-timeline.experiment-repo-nav > div.repository-content > div.position-relative.border-top > div.release.clearfix.label-latest > div.release-body.commit.open.float-left > div.my-4 > ul",
+#         first=True,
+#     ).absolute_links
 
-    asset = None
-    for candidate in candidates:
-        if sys.platform in candidate and "sha256" not in candidate:
-            asset = candidate
+#     asset = None
+#     for candidate in candidates:
+#         if sys.platform in candidate and "sha256" not in candidate:
+#             asset = candidate
 
-    if asset:
-        logging.info("Installation candidate found!")
-        r = requests.get(asset, stream=False)
-        tarball = NamedTemporaryFile(delete=False)
-        with open(tarball.name, "wb") as f:
-            f.write(r.content)
+#     if asset:
+#         logging.info("Installation candidate found!")
+#         r = requests.get(asset, stream=False)
+#         tarball = NamedTemporaryFile(delete=False)
+#         with open(tarball.name, "wb") as f:
+#             f.write(r.content)
 
-        tar = tarfile.open(tarball.name, "r|gz")
-        logging.info("Extracting docutil installation…")
-        tar.extractall(path=BIN_CACHE)
-        tar.close()
+#         tar = tarfile.open(tarball.name, "r|gz")
+#         logging.info("Extracting docutil installation…")
+#         tar.extractall(path=BIN_CACHE)
+#         tar.close()
 
 
 
@@ -113,9 +113,10 @@ class DigitalOcean:
         Return–code is always asserted to be ``0``.
         """
 
-        doctl_location = system_which("docutil")
+        doctl_location = system_which("doctl")
         if not doctl_location:
-            ensure_doctl()
+            # ensure_doctl()
+            raise RuntimeError('doctl does not appear to be installed and on your PATH!')
 
         if expect_json:
             args = list(args)
