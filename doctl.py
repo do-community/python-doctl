@@ -85,7 +85,7 @@ class DigitalOcean:
             args = list(args)
             args.extend(["--access-token", self.token])
 
-        args = " ".join(args)
+        args = " ".join(map(str, args))
         cmd = f"doctl {args}"
 
         logging.info(cmd)
