@@ -11,12 +11,6 @@ import delegator
 import maya
 
 
-try:
-    os.makedirs(BIN_CACHE)
-except FileExistsError:
-    pass
-
-
 class DOCtlError(RuntimeError):
     def __init__(self, c):
         self.c = c
@@ -211,7 +205,7 @@ class ComputeDroplet:
         if wait:
             args.extend(["--wait"])
 
-        return doctl("compute", "droplet", "create", *args)
+        return self.do.doctl("compute", "droplet", "create", *args)
 
     def actions(self, droplet_id):
         """droplet actions."""
