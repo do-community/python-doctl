@@ -195,7 +195,10 @@ class ComputeDroplet:
         if user_data:
             args.extend(["--user-data", user_data])
         if tags:
-            args.extend(["--tags", tags])
+            if not isinstance(tags, list):
+                raise ValueError("Tags must be a list")
+            tag_args = ["--tag-names {0}".format(tag) for tag in tags]
+            args.extend(tag_args)
         if enable_private_networking:
             args.extend(["--enable-private-networking"])
         if enable_monitoring:
@@ -245,7 +248,8 @@ class ComputeDomain:
     def create(self, domain, ip_address):
         """Create domain."""
         return self.do.doctl(
-            "compute", "domain", create, domain, "--ip-address", ip_address
+            "compute", "domain", "create",
+            '"{0}"'.format(domain), "--ip-address", '"{0}"'.format(ip_address)
         )
 
     def list(self):
@@ -258,7 +262,7 @@ class ComputeDomain:
 
     def delete(self, domain):
         """Delete domain."""
-        return self.do.doctl("compute", "domain", "delete", domain, "--force")
+        return self.do.doctl("compute", "domain", "delete", domain, "--force", expect_json=False)
 
 
 class ComputeDomainRecords:
@@ -288,15 +292,15 @@ class ComputeDomainRecords:
         """List records."""
         args = []
         if record_data:
-            args.extend(["--record-data", record_data])
+            args.append('--record-data "{0}"'.format(record_data))
         if record_flags:
             args.extend(["--record-flags", record_flags])
         if record_name:
-            args.extend(["--record-name", record_name])
+            args.append('--record-name "{0}"'.format(record_name))
         if record_port:
             args.extend(["--record-port", record_port])
         if record_priority:
-            args.extend(["--record-priority", record_priority])
+            args.append('--record-priority "{0}"'.format(record_priority))
         if record_tag:
             args.extend(["--record-tag", record_tag])
         if record_ttl:
@@ -994,5 +998,66 @@ class Account:
         return self.do.doctl("account", "ratelimit")
 
 
+class ProjectResources:
+    """ProjectResources is used to access project resource commands."""
+
+    def __init__(self, project_id, do=None):
+        self.do = do or DigitalOcean()
+        self.project_id = project_id
+
+    def assign(self, uniform_resource_names):
+        if not isinstance(uniform_resource_names, list):
+            raise ValueError("Uniform resource names must be a list")
+        resource_args = ['--resource=\"{0}\"'.format(urn) for urn in uniform_resource_names]
+        return self.do.doctl("projects", "resources", "assign", self.project_id, *resource_args)
+
+    def get(self, uniform_resource_name):
+        return self.do.doctl("projects", "resources", "get", uniform_resource_name)
+
+    def list(self):
+        return self.do.doctl("projects", "resources", "list", self.project_id)
+
+
+class Projects:
+    """projects is used to access project commands."""
+
+    def __init__(self, do=None):
+        self.do = do or DigitalOcean()
+
+    def get(self, project_id):
+        return self.do.doctl("projects", "get", project_id)
+
+    def create(self, name, purpose, description=None, environment=None):
+        args = []
+        args.extend(["--name", name])
+        args.extend(["--purpose", purpose])
+
+        if description:
+            args.extend(["--description", description])
+
+        valid_environments = ["Development", "Staging", "Production"]
+        if environment and environment.capitalize() in valid_environments:
+            args.extend(["--environment", environment.capitalize()])
+
+        return self.do.doctl("projects", "create", *args)
+
+    def delete(self, project_ids):
+        if not isinstance(project_ids, list):
+            raise ValueError("Project ids must be a list")
+        project_args = ['"{0}"'.format(project_id) for project_id in project_ids]
+        c = self.do.doctl("projects", "delete", *project_args, expect_json=False)
+        return c.return_code == 0
+
+    def get(self, project_id):
+        return self.do.doctl("projects", "get", project_id)
+
+    def list(self):
+        return self.do.doctl("projects", "list")
+
+    def resources(self, project_id):
+        return ProjectResources(project_id, self.do)
+
+
 compute = Compute()
 account = Account()
+projects = Projects()
