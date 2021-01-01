@@ -250,14 +250,11 @@ class ComputeDomain:
 
     def create(self, domain, ip_address=None):
         """Create domain."""
-        if ip_address != None:
-            return self.do.doctl(
-              "compute", "domain", "create", domain, "--ip-address", ip_address
-            )
-        else:
-            return self.do.doctl(
-              "compute", "domain", "create", domain
-            )
+        args = []
+        if ip_address:
+            args.extend(["--ip-address", ip_address])
+            
+        return self.do.doctl("compute", "domain", "create", domain, *args)
       
     def list(self):
         """List domain."""
